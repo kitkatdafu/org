@@ -1,0 +1,1042 @@
+#+TITLE: Notes on Statistical Machine Learning
+#+AUTHOR: Reid Chen
+#+EMAIL: reid.chen@wisc.edu
+#+OPTIONS: email:t
+#+LATEX_HEADER: \input{/Users/yichen/projects/header.tex}
+
+* Machine Learning and Inductive Bias
+** What is machine learning?
+
+1. Development of algorithms which allow a computer to "learn" specific tasks from training examples.
+2. Learning means that the computer can not only memorize the seen examples, but can generalize to previously unseen instances.
+3. Ideally, the computer should use the examples to extract a general "rule" how the specific task has to be performed correctly.
+
+** Deduction vs. Induction
+
+\begin{definition}[Deduction]
+Deduction is the process of reasoning from one or more general statements (premises) to reach a logically certain conclusion.
+\end{definition}
+
+Example:
+- Premise 1: every person in this room is a student.
+- Premise 2: every student is older than 10 years.
+- Conclusions: Every person in this room is older than 10 years.
+
+If the premises are correct, then all conclusions are correct as well. This is nice in theory. Mathematics is based on this principle. But there is no natural way to deal with uncertainty regarding the premises. Therefore, deduction does not suit well for machine learning.
+
+\begin{definition}[Induction]
+Induction is a kind of reasoning that constructs or evaluates general propositions that are derived from specific examples.
+\end{definition}
+
+Example:
+- We drop lots of things, very often.
+- In all our experiments, the things fall downwards, not upwards.
+- So we conclude that likely, things always fall downwards when we drop them.
+
+Very importantly, we can never be sure that our conclusion is correct.
+
+Humans do inductive reasoning all the time. We draw uncertain conclusions from our relatively limited experiences.
+
+Example:
+- You come 10 minutes late to every lecture I give.
+- The first 7 times I don't complain.
+- You conclude that I don't care and it won't have any consequences.
+- BUT, you cannot be sure.
+  
+Machine learning tries to automate the process of inductive inference.
+
+** Why should machine learning work at all?
+
+1. We will only be able to learn if there is something we can learn:
+   - Output $Y$ has something to do with input $X$
+   - Similar inputs lead to similar outputs
+   - There is a simple relationship or simple rule to generate output for a given input
+   - The function $f$ is simple
+2. We need to have an idea what we are looking for. This is called the inductive bias. Learning is impossibel without such a bias.
+
+** Overfitting, underfitting
+
+Choosing a "reasonable function class $\mathcal{F}$" is crucial.
+
+\begin{definition}[Overfitting]
+We can always find a function that explains all training points very well or even exactly. But such a function tends to be very complicated and modesl the noise as well. Predictions for unseen data points are poor. Low approximation error, high estimation error.
+\end{definition}
+
+\begin{definition}[Underfitting]
+Model is too simplisitic. But estimated functions are stable with respect to noise. Large approximation error , low estimation error.
+\end{definition}
+
+* The kNN Classifier
+** Data
+- Take a set of training points and labels $(X_i, Y_i)_{i=1, \dots, n}$. The machine learning algorithm has access to this training input and can use it to genereate a classification rule $f: \mathcal{X} \to \{0, 1\}$.
+- Take a set of test points $(X_j, Y_j)_{j = 1, \dots, m}$. This set is independent from the training set ("previously unseen points") and will be used to evaluate the success of the training algorithm.
+** Training Error
+Assume our machine learning algorithm has used the training data $(X_i, Y_i)_{i=1,\dots,n}$ to construct a rule $f_{alg}$ for predicting labels.
+- Predict tthe labels of all training points: $\hat{Y}_i := f_{alg}(X_i)$.
+- Compute the error ("loss") of the classifier on each training point:
+  $$
+        \ell(X_i, Y_i, \hat{Y}_i) := \begin{cases}
+                0 & \quad \text{if} \quad \hat{Y}_i = Y_i \\
+                1 & \quad \text{otherwise}
+        \end{cases}.
+  $$
+  This is called the pointwise 0-1 loss.
+- Define the training error of this classifier ("risk of the classifier") as the average error over all training points:
+  $$
+        R_{train}(f_{alg}) = \frac{1}{n} \sum^n_{i=1} \ell(X_i, Y_i, f_{alg}(X_i)).
+  $$
+  Later we will call this quantity the "empirical risk" of the classiifer (with respect to the 0-1 loss).
+** Test Error
+- Predict the label sof all test points: $\hat{Y}_j := f_{alg}(X_j)$.
+- Compute the error (loss) of the classifier on each test point:
+  $$
+        \ell(X_j, Y_j, \hat{Y}_j) := \begin{cases}
+                0 & \quad \text{if} \quad \hat{Y}_j = Y_j \\
+                1 & \quad \text{otherwise}.
+        \end{cases}
+  $$
+- Define the test error (risk) of the classifier as the average error over all test points:
+  $$
+        R_{test}(f_{alg}) = \frac{1}{m} \sum^m_{j=1} \ell(X_j, Y_j, f_{alg}(X_j)).
+  $$
+- The quantity $R_{test}$ as defined above is an empirical quantity (it depends on the test set). Later, we will define the true risk $R$ of the classifier, which is the expectation over this quantity.
+** Remarks
+- Obviously, it is not so much of a challenge for an algorithm to correctly predict the training labels (after all, the algorithm gets to know these labels).
+- Still, machine learning algorithms usually make training errors, that is they construct a rule $f_{alg}$ that does not perfectly fit the training data.
+- But the crucial measures of success is the performance of the classifier on an independent test set.
+- In particular, it is not the case that a low training error automatically indicates a low test error or vice verse.
+** The K-nearest-neighbor classifier
+Given training points $(X_i, Y_i)_{i=1, \dots, n} \subset \mathcal{X} \times \{0, 1\}$ and a distance function $d: \mathcal{X} \times \mathcal{X} \to \mathbb{R}$. The goal is to construct a classifier $f$ that predicts the labels from the inputs.
+- Given a test point $X'$, compute all distances $d(X', X_i)$ and sort them in ascending order.
+- Let $X_{i_1}, \dots, X_{i_k}$ be the first $k$ points in this order (the $k$ nearest neighbors of $X'$). We denote the set of these points by $\mathrm{kNN}(X')$.
+- Assign to $Y'$ the majority label among the corresponding labels $Y_{i_1}, \dots, Y_{i_k}$, that is define
+  $$
+  Y' = \begin{cases}
+  0 & \quad \text{if} \quad \sum^k_{j=1} Y_{i_j} \le \frac{k}{2} \\
+  1 & \quad \text{otherwise}
+  \end{cases}.
+  $$
+** Influence of the parameter $k$
+The classification results will depende on the parameter $k$.
+- $k$ too small ------ overfitting (extreme case: $k = 1$, very wiggly and prone to noise, zero training error)
+- $k$ too larger ------ underfitting (extreme case: $k = n$, every point gets the same label)
+- Theeoretical analysis can reveal: $k$ should be roughly of order $\log n$ as $n \to \infty$.
+** Influence of the similarity function
+The choice of the similarity function is crucial as well.
+- The performance of kNN rules can only be good if the distance function encodes the relevant information.
+- In many applications, it is not so obvious how to define a good dstance of similarity function.
+** Inductive bias
+Input points that are close to each other should have the same label.
+** Extension
+- The kNN rule can easily used for regression as well: As output value take the average over the labels in the neighborhood.
+- kNN-based algorithms can also be used for many other tasks, such as density estimation, outlier detection, clustering, etc.
+** Summary
+In practice, the kNN classifier is about the simplest classifier that exists. But often it performs quite reasonably. Whatever your specific machine learning task is, you should always consider the kNN classifier as a baseline. In theory, one can prove that in the limit of infinitely many data points, the kNN classifier is "consistent", that is it learns the best possible function.
+* Formal Setup, Risk, Consistency
+** The underlying space
+- Input space $\mathcal{X}$, output space $\mathcal{Y}$
+  - Sometimes, the spaces $\mathcal{X}$ or $\mathcal{Y}$ have some mathematical structure (topology, metric, vector space, etc), or we try to construct such a structure.
+  - We assume that each space endowed with a $\sigma$-algebra, to be able to define a probability measure on the space.
+- Probability distribution $P$ on the product space $\mathcal{X} \times \mathcal{Y}$ (with product sigma algebra)
+  - No assumption on the form of the probability distribution
+  - both input variables and output variables are random quantities
+** A classifier / prediction function
+\begin{definition}[classifier]
+        A classifier or a prediction function is simply a function $f: \mathcal{X} \to \mathcal{Y}$.
+\end{definition}
+We now need to be able to measure how "good" a classifier / prediction function is. Depends on the problem we want to solve, e.g.
+- If $\mathcal{Y}$ discrete: classification
+- If $\mathcal{Y}$ continuous: regression
+- Other output spaces are possible as well, for example, structured prediction.
+** Loss function
+\begin{definition}[loss function]
+        The loss function measures how "expensive" an erros is. A loss function is a function $\ell: \mathcal{X} \times \mathcal{Y} \times \mathcal{Y} \to \mathbb{R}_{\ge 0}$.
+\end{definition}
+Example:
+\begin{definition}[0-1 loss function]
+        The 0-1 loss function for classification is defined as
+        $$
+                \ell(x, y, y') = \begin{cases}
+                        0 &\quad if y = y' \\
+                        1 &\quad \text{otherwise}.
+                \end{cases}
+        $$
+\end{definition}
+\begin{definition}[squared loss]
+        The squared loss for regression is defined as
+        $$
+                \ell(x, y, y') = (y - y')^2
+        $$
+\end{definition}
+Note that the choice of loss function influences the inductive bias. In some applications, it is important that the loss also depends on $x$. It is also important that the loss depends on the order of $y$ and $y'$ (the type of error).
+** True risk
+\begin{definition}[true risk]
+The true risk (or true expected loss) of a prediction function $f: \mathcal{X} \to \mathcal{Y}$ (with respect to loss function $\ell$) is defined as
+$$
+R(f) := \mathbb{E}[\ell(X, Y, f(Y))]
+$$
+where the expectation is over the random draw of $(X, Y)$ according to the probability distribution $P$ on $\mathcal{X} \times \mathcal{Y}$.
+\end{definition}
+The goal of machine learning is to use the training data to construct a function $f_n$ whose true risk is as small as possible.
+** Bayes risk and Bayes classifier
+\begin{definition}[Bayes risk]
+The Bayes risk is defined as
+$$
+R^\star := \inf \{ R(f) \mid f : \mathcal{X} \to \mathcal{Y}, f \text{ measureable}\}.
+$$
+\end{definition}
+In case the infimum is attained, the corresponding function
+$$
+f^\star := \arg \min R(f)
+$$
+is called the Bayes classsifier / Bayes predictor.
+** The training data and learning
+Assume we are given supervised training data:
+- We draw $n$ training points $(X_i, Y_i)_{i=1, \dots, n} \in \mathcal{X} \times \mathcal{Y}$ i.i.d. according to probability distribution $P$.
+Note that "i.i.d." is a strong assumption.
+The goal of learning is to construct a function $f_n$ that has true risk close to the Bayes risk, that is, $R(f_n) \approx R^\star$.
+** Consistency of a learning algorithm
+Consider an infinite sequence of data points $(X_i, Y_i)_{i \in \mathbb{N}}$ that have been drawn i.i.d. from distribution $P$ over $\mathcal{X} \times \mathcal{Y}$. Denote by $f_n$ the learning rule that has been constructed by an algorithm $\mathcal{A}$ based on the first $n$ training points.
+\begin{definition}[consistent]
+We say that the algorithm $\mathcal{A}$ is consistent (for probability distribution $P$) if the true risk $R(f_n)$ of its selected function $f_n$ converges to the Bayes risk, that is
+$$
+\forall \varepsilon > 0: \lim_{n \to \infty} \mathbb{P}(R(f_n) - R^\star > \varepsilon) = 0.
+$$
+\end{definition}
+\begin{definition}[universlaly consistent]
+We say the algorithm $\mathcal{A}$ is universally consistent if it is consistent for all possible probability distributions $P$ over $\mathcal{X} \times \mathcal{Y}$.
+\end{definition}
+Ultimately, what we want to find is a learning algorithm that is universally consistent. No matter what the underlying probability distribution is, when we have seen "enough data points", then the true risk of our learning rule $f_n$ will be arbitrarily close to the best possible risk.
+* Bayesian decision theory
+Before we dive into machine learning principles, let's consider how we would solve classification if we had perfect knowledge of the probability distribution $P$.
+
+** Running example: male or female?
+
+Predict gender of a person from body height: Given class conditionals $P(X \mid Y)$, how would you label the input $X = 160$?
+
+*** Approach 1: just look at priors (a bit stupid)
+
+Decide based on class prior probabilities $P(Y)$.
+- If you don't have any clue what to do, you would simply use the following rule: you always predict the label of the larger class, that is
+$$
+f_{n}(X) = \begin{cases}
+m &\quad \text{if } P(Y=m) > P(Y = f) \\
+f & \quad \text{otherwise}.
+\end{cases}
+$$
+
+*** Approach 2: maximum likelihood principle
+
+Decide based on the likelihood functions $P(X \mid Y)$ (maximum likelihood approach).
+- Consider the class conditional distributions $P(X \mid Y = m)$ and $P(X \mid Y = f)$.
+- Then, predict the label with the higher likelihood:
+$$
+f_{n}(x) = \begin{cases}
+m &\quad \text{if } P(X = x \mid Y = m) > P(X = x \mid Y = f) \\
+f &\quad \text{otherwise}.
+\end{cases}
+$$
+
+*** Approach 3: Bayesian a posteriori criterion
+
+Decide based on the posterior distributions $P(Y \mid X)$ (Bayesian maximum a posteriori approach)
+- Computer the posterior probabilities
+$$
+P(Y = m \mid X = x) = \frac{P(X = x \mid Y=m) \cdot P(Y = m)}{P(X=x)}
+$$
+- Predict by the following rule:
+$$
+f_{n}(x) = \begin{cases}
+m &\quad \text{if } P(Y = m \mid X = x) > P(Y = f \mid X = x) \\
+f &\quad \text{otherwise}.
+\end{cases}
+$$
+
+*** Approach 4: also take costs of errors into account
+
+Take the "costs" of errors into account:
+- Define a loss function $\ell(x, y, \hat{y})$ that tells you how much loss you incur by classifying the label of $x$ as $\hat{y}$ if the true label is $y$.
+- The risk $R(\hat{y} \mid X = x) := \mathbb{E}[\ell(x, Y, \hat{y})]$ is the expected loss we incur at point $x$ when predicting $\hat{y}$ (where the expectation is over the randomness in the sample, in this case only the randomness concerning the true label $Y$ of $x$)
+- Consider the expected conditional risk at point $x$
+$$
+R(\hat{y} \mid X = x) = \ell(x, m, \hat{y}) P(Y = m \mid X = x) + \ell(x, f, \hat{y}) P (Y = f \mid X = x).
+$$
+- Use Bayes decision rule: select the label $f_{n}(X)$ for which the conditional risk is minimal.
+
+* The Bayes Classifier
+** Regression function (context of classification)
+
+Consider $(X, Y)$ drawn according to a probability distribution $P$ on the product space $\mathcal{X} \times \{ 0, 1 \}$. We want to describe the distribution $P$ in terms of two other quantities:
+- Let $\mu$ be the marginal distribution of $X$, that is
+$$
+\mu(A) = P(X \in A)
+$$
+- Define the so-called regression function
+$$
+\eta(x) := \mathbb{E}(Y \mid X = x)
+$$
+- In the special case of classification, the regression function can be written as
+$$
+\eta(x) = 0 \cdot P(Y = 0 \mid X = x) + 1 \cdot P(Y = 1 \mid X =x ) = P(Y = 1 \mid X = x).
+$$
+Intuition:
+- If $\eta(x)$ is close to 0 or close to 1, then classifying $x$ is easy.
+- If $\eta(x)$ is close to 0.5, then classifying $x$ is difficult.
+
+\begin{proposition}[unique decomposition]
+        The probability distribution $P$ is uniquely determined by $\mu$ and $\eta$.
+\end{proposition}
+
+The intuition, in the discrete case, is that we can rewrite
+$$
+P(X = x, Y = 1) = P(Y = 1 \mid X = x)P(X = x) = \eta(x)\mu(x)
+$$
+and similarly
+$$
+P(X = x, Y = 0) = P(Y = 0 \mid X = x)P(X = x) = (1 - \eta(x))\mu(x)
+$$
+
+** Explicit form of the Bayes classifier
+
+Consider the 0-1 loss function. Recall that the risk of a classifier under the 0-1-loss counts "how often" the classifier fails, that is
+$$
+R(f) = \mathbb{E}[\ell(X, Y, \hat{Y})]a = \mathbb{E}[\mathbb{1}[\hat{Y} \ne Y]] = P(\hat{Y} \neq Y).
+$$
+The Bayes classifier $f^\star$ was defined as the classifier that minimizes the true risk. This is an implicit definition, we don't have a formula for it yet. Now, consider the following classifier
+$$
+f^\circ(x) = \begin{cases}
+1 &\quad \text{if } \eta(x) \geq \frac{1}{2} \\
+0 &\quad \text{otherwise}.
+\end{cases}
+$$
+
+\begin{theorem}[$f^\circ$ is the Bayes classifier]
+        Consider classification with 0-1 loss. Let $f : \mathcal{X} \to \{ 0, 1 \}$ be any (measurable) classifier and $f^\circ$ the classifier defined above. Then, $R(f) \geq R(f^\circ)$.
+\end{theorem}
+
+\begin{proof}
+        Consider any fixed classifier $f: \mathcal{X} \to \{0, 1\}$ and compute its error probability at some fixed point $x$:
+        \begin{align*}
+                P(f(x) \ne Y \mid X = x) &= 1 - P(f(x) = Y \mid X = x) \\
+                                         &= 1 - P(f(x) = 1, Y = 1 \mid X = x) - P(f(x) = 0, Y = 0 \mid X = x) \\
+                                         &= 1 - \mathbb{1}[f(x) = 1] P(Y = 1 \mid X = x) - \mathbb{1}[f(x) = 0] P(Y = 0 \mid X = x) \quad ,f(x) \text{ deterministic,}\\
+                                         &= 1 - \mathbb{1}[f(x) = 1] \eta(x) - \mathbb{1}[f(x) = 0] (1 - \eta(x)).
+        \end{align*}
+        Then, using this, we obtain the difference between $P(f(x) \ne Y \mid X = x)$ and $P(f^\circ(x) \ne Y \mid X = x)$:
+        \begin{align*}
+                P(f(x) \ne Y \mid X = x) - P(f^\circ(x) \ne Y \mid X = x) = (2\eta(x) - 1)(\mathbb{1}[f^\circ(x) = 1] - \mathbb{1}[f(x) = 1]) \ge 0.
+        \end{align*}
+        This is because if $f^\circ(x) = 1$, then $\eta(x) \ge 0.5$, so both terms are non-negative. If $f^\circ(x) = 0$, then $\eta(x) < 0.5$, so both terms are non-positive. Now, we have seen that for all fixed values $x$, the probability of error satisfies
+        $$
+                P(f(x) \ne Y \mid X = x) \ge P(f^\circ(x) \ne Y \mid X = x).
+        $$
+        Because this holds for any individual value of $x$, it also holds in expectation over all $x$. This implies
+        $$
+        R(f) \ge R(f^\circ).
+        $$
+\end{proof}
+This theorem means that if we work with 0-1-loss and if we know the underlying probability distribution and hence the regression function, then we don't need to "learn", we can simply write down what the optimal classifier is. For many other loss functions, one can also explicitly compute the optimal classifier. However, in practice, we don't know the regression function.
+
+** Plug-in classifier
+
+If we don't know the underlying distribution, but are given some training data, simply estimate the regression function $\eta(x)$ by some quantity $\eta_n(x)$ and build the plugin-classifier
+$$
+        f_n := \begin{cases}
+        1 &\quad \text{if } \eta_n(x) \ge \frac{1}{2} \\
+        0 &\quad \text{otherwise}.
+        \end{cases}
+$$
+In theory, it can be shown that the plug-in approach is universally conssitent. That is, in the limit of infinitely many training points, the classifier is going to converge to the best one out there. However, in practice, estimating densities is notoriously hard, in particular for high-dimensional input spaces. We would need ridiculous amount of training data. So unfortunately, the plug-in approach is useless in practice.
+
+** For regression under $L_2$ loss.
+
+While in classification, there is a natural loss function (the 0-1-loss), there exist many loss functions for regression and it is not so obvious which one is the most useful one. In the following, let's look at the classic case, the squared loss ($L_2$ loss) function:
+$$
+        \ell(x, y, f(x)) = (f(x) - y)^2.
+$$
+
+*** Regression function
+
+As in the classification setting, we define the regression function:
+$$
+        \eta(x) = \mathbb{E}[Y \mid X = x].
+$$
+We now want to show an explicit formula for the Bayes learner as well. As in the classification case, we fix a particular loss function, this time, it is the squared loss. We need one more intermediate result:
+
+\begin{proposition}[decomposition]
+We always have
+$$
+        \mathbb{E}[|f(X) - Y|^2] = \mathbb{E}[|f(X) - \eta(X)|^2] + \mathbb{E}[|\eta(X) - Y|^2].
+$$
+\label{decomposition}
+\end{proposition}
+
+*** Explicit form of optimal solution
+
+Define the following learning rule that predicts the real-values output based on the regression function $\eta$:
+$$
+        f^\circ: \mathcal{X} \to \mathbb{R}, f^\circ(x) := \eta(x)
+$$
+
+\begin{theorem}[explicit form of optimal $L_2$-solution]
+        The function $f^\circ$ minimizes the $L_2$-risk.
+\end{theorem}
+
+\begin{proof}
+Follows directly from Proposition \ref{decomposition}, the second expectation on the right-hand side does not depend on $f$. The first expectation is always non-negative, and it is 0 if and only if $f(X) = \eta(X)$. So the whole right-hand side is minimized by $f(X) = \eta(X)$.
+\end{proof}
+
+* Risk minimization, Approximation, and Estimation Error
+
+** Two major principles
+
+Assume we operate in the standard setup, and are given a set of training points $(X_i, Y_i)$. Based on these points, we want to "learn" a function $f: \mathcal{X} \to \mathcal{Y}$ that has as small true loss as possible. There are two major approaches to supervised learning:
+1. Empirical risk minimization (ERM)
+2. Regularized risk minimization (RRM)
+
+** Empirical risk minimization
+
+As we don't know $P$, we cannot compute the true risk. But, we can compute the empirical risk based on a sample $(X_i, Y_i)_{i = 1, \dots, n}$:
+$$
+        R_n(f) := \frac{1}{n} \sum^n_{i=1} \ell(X_i, Y_i, f(X_i)).
+$$
+The key point is that the empirical risk can be compupted based on training points only.
+
+Let $\mathcal{F}$ denote a set of functions from $\mathcal{X} \to \mathcal{Y}$. Within these functions, we choose the one that has the smallest empirical risk:
+$$
+        f_n := \arg \min_{f \in \mathcal{F}} R_n(f).
+$$
+Note that the minimzer may not unique.
+
+** Estimation vs. approximation error
+
+With ERM, we can make two types of error. Denote by $\tilde{f}$ the true best function in the set $\mathcal{F}$, that is, $\tilde{f} = \arg \min_{f \in \mathcal{F}} R(f)$.
+
+\begin{definition}[estimation error]
+        The quantity $R(f_n) - R(\tilde{f})$ is called the estimation error. It is a random variable that depends on the random sample.
+\end{definition}
+
+\begin{definition}[approximation error]
+        The quantity $R(\tilde{f}) - R(f^\star)$ is called the approximation error. It is a deterministic quantity that does not depend on the sample, but on the choice of the space $\mathcal{F}$.
+\end{definition}
+
+** Overfitting vs. underfitting
+
+Underfitting happens if $\mathcal{F}$ is too small. In this case, we have a small estimation error but a large approximation error. Overfitting happens if $\mathcal{F}$ is too large. Then, we have a high estimation error but a small approximation error.
+
+** Bias-Variance tradeoff in $L_2$ -regression
+
+Sometimes, another decomposition of the errors is used. This can be seen most easily for the case of regression with $L_2$ loss: Let $f_n$ be the function constructed by an algorithm on $n$ points, and $f^\star: \mathbb{R}^d \to \mathbb{R}$ the true best function (the regression function). Then, we can decompose the pointwise expected $L_2$ risk in two terms:
+$$
+       \mathbb{E}[|f_n(x) - f^\star(x)|^2] = \mathbb{E}[(f_n(x) - \mathbb{E}[f_n(x)])^2] + (\mathbb{E}[f_n(x)] - f^\star(x))^2.
+$$
+The first term on the righ-hand side is the variance term: the variance of random variable $f_n(x)$. The second term is the bias term. It measures how much $\mathbb{E}[f_n]$ deviates from $f^\star$. The variance term has the same intuition as estimation error, depends on random data and the capacity of the function class $\mathcal{F}$. The bias term has the same intuition as the approximation error. It does not depend on the data, just on the capacity of the function class $\mathcal{F}$.
+
+** ERM remarks
+
+From a conceptual side, ERM is a striaght forward learning principle. They key to the suceess or failure of ERM is to choose a good function class $\mathcal{F}$. From the computational side, it is not always easy (depending on function class the loss function, the problem can be quite challenging: finding the minimizer of the 0-1-loss is often NP hard). This is why in practice we use convex relaxations of the 0-1-loss function.
+
+** Regularized riks minimization
+
+Let $\mathcal{F}$ be a very large space of functions. Define a regularizer $\Omega: \mathcal{F} \to \mathbb{R}_{\ge 0}$ that measures how "complex" a function is. Define the regularized risk
+$$
+R_{reg, n}(f) := R_n(f) + \lambda \cdot \Omega(f)
+$$
+where $\lambda > 0$ is called regularization constant. Then, we choose $f \in \mathcal{F}$ to minimize the regularized risk. The intuition is that if we can fit the data reasonably well with a "simple function", then choose such a function. If all simple functions lead to a very high empirical risk, then better choose a more complex function.
+
+* Feature Representation
+
+\begin{definition}[feature map]
+In machine learning, the mapping $\Phi: \mathcal{X} \to \mathbb{R}^d$ that takes an abstract object $X$ to its feature representation is called the feature map. It is usually denoted by $\Phi$.
+\end{definition}
+
+** Feature normalization
+
+In regularized regression, it makes a difference how we scale our data. Different scales lead to different solutions, because they affect the regularization in a different way. Moreoever, we typically want all coordinates to have "the same amount of influence" on the solution. This is not the case if our measurements have completely different orders of magnitude. In order to make sure that all basis functions "are treated the same", it is thus recommended to standardize your data.
+1. centering
+   $$
+   \Phi_i^\text{centered} := \Phi_i - \bar{\Phi}_i, \bar{\Phi}_i := \frac{1}{n} \sum^n_{j=1} \Phi_i(X_j)
+   $$
+2. normalizing the variance: resacle each bassis function such that it has unit variance $L_2$-norm on the training data.
+   $$
+   \Phi_i^\text{rescaled} := \frac{\Phi_i^\text{centered}}{(\sum^n_{j=1} \Phi^\text{centered}_{i} (X_j)^2)^{1/2}}
+   $$
+In terms of the matrix $\Phi$, you center and normalize the columns of the matrix to have center 0 and unit norm.
+
+* Convex Optimization Problem
+
+\begin{definition}[convex set]
+        A subset $S$ of a vector space is called vonex if for all $x, y \in S$ and for all $t \in [0, 1]$, it holds that
+        $$
+                tx + (1 - t)y \in S.
+        $$
+\end{definition}
+In other words, for any two points $x, y \in S$, the straight line connecting these two points is contained in the set $S$.
+
+\begin{definition}[convex function]
+        A function $f: S \to \mathbb{R}$ that is defined on a convex domain $S$ is called convex if for all $x, y \in S$ and $t \in [0, 1]$, we have
+        $$
+                f(tx + (1 - t)y) \le tf(x) + (1 - t)f(y).
+        $$
+\end{definition}
+Intuitively, this means that if we look at the graph of the function and we connect two points oof this graph by a straight line, then this line is always above the graph.
+
+Functions of one variable that are twice differentiable are convex if and only their second derivative is non-negative. Functions of several variables that are twice differentiable are convex if their Hessian matrix is positive (semi)-definite.
+Observe that for convex function $g$, the sublevel sets of the form
+$$
+        \{x | g(x) \le 0 \}
+$$
+are convex. This is not true the other way around. you can have all sublevel sets convex, but yet the function is not convex.
+
+\begin{definition}[convex optimization]
+        An optimization problem of the form
+        \begin{align*}
+                \min &\quad f(x) \\
+                \text{subject to} &\quad g_i(x) \le 0 (i = 1, \dots, k)
+        \end{align*}
+        is called onvex if the function $f, g_i$ are convex.
+\end{definition}
+
+\begin{definition}[objective function]
+        The function $f$ over which we optimize is called the objective function.
+\end{definition}
+
+\begin{definition}[constraints]
+        The functions $g_i$ are called the constraints.
+\end{definition}
+
+\begin{definition}[feasible set]
+        The set of points where all constraints are satisfied is called the feasible set.
+\end{definition}
+
+Sometimes, one also considers equality constraints of the form $h_j = 0$. They can always be replaced by two inequality constraints $h_j \le 0$ and $-h_j \le 0$. However the only situation in which $h_j$ and $-h_j$ are both convex occurs if $h$ is a linear function. Convex optimization problems have the desirable property that any local minimum is already a global minimum.
+
+* Linear Least Squares Regression
+** Setup
+
+Assume we have training data $(X_i, Y_i)$ with $X_i \in \mathcal{X} := \mathbb{R}^d$ and $Y_i \in \mathcal{Y} := \mathbb{R}$. We want to find the "best" linear function, that is, a function of the form
+$$
+f(x) = \sum_{i=1}^d w_i x_i + b
+$$
+where $x = (x_1, \dots, x_d)^\top \in \mathbb{R}^d$. The $w_i$ are called "weights" and $b$ the "offset" or "intercept" or "threshold". In terms of loss function, we use the squared loss. Formally, the linear least squares problem is the following:
+
+Find the parameters $w_1, \dots, w_d \in \mathbb{R}$ and $b \in \mathbb{R}$ such that the empirical least squares error of the linear function $f$ is minimal:
+$$
+\frac{1}{n} \sum_{i=1}^n (Y_i - f(X_i))^2.
+$$
+
+** Concise notation
+
+To write everything in a more concise form, we stack the training inputs into a big matrix $X$ (each point is one row) and the output in a big vector. We denote the $i^\text{th}$ training point of the dataset as $X_i$, with entries denoted by $X_{i1}, \dots, X_{id}$. With this notation, we not can write
+$$
+f(X_i) = X_i^\top w + b = (Xw)_i + b.
+$$
+With this notation, the linear least squares problem is the following:
+Determine $w \in \mathbb{R}^d$ and $b \in \mathbb{R}$ as to minimize the empirical least squares error
+$$
+\frac{1}{n} \sum_{i=1}^n (Y_i - ((Xw)_i + b))^2.
+$$
+Even more concicely, we can extent the matrix with a column of ones and extend the $w$ vector with $b$:
+$$
+(\tilde{X}\tilde{w})_i = \sum_{k=1}^{d + 1} \tilde{X}_{ik}\tilde{w}_k = \sum^d_{k=1} X_{ik} w_k + b = (Xw)_i + b.
+$$
+Adn hence, there is a unique correspondence between the original problem and the following new problem:
+Determine $\tilde{w} \in \mathbb{R}^{d + 1}$ as to minimize the empirical least squares error
+$$
+\frac{1}{n} \sum^n_{i=1} (Y_i - (\tilde{X}\tilde{w})_i)^2 = \frac{1}{n} \norm{Y - \tilde{X} \tilde{w}}.
+$$
+Without loss of generality, from now on we consider the simplified problem that does not involve the intercept $b$. We also remove the tildes on the letters $\tilde{X}$ and $\tilde{w}$ to make notation simpler. Moreoever, we sometimes consider different factors in front of the norm. For example, we might drop the $\frac{1}{n}$ and include a factor $\frac{1}{2}$ for mathematical convenience. It does not change the solution, but he formulas look nicer.
+
+** Machine learning is optimization
+
+In order to solve the problem, we need to solve an optimization problem. In this particular case, however, we can solve it analytically. For most other ML algorithms, we need ot use optimization algorithms to achieve this.
+
+** Least squares regression is convex
+
+\begin{proposition}[least squares is convex]
+        The least squares optimization problem defined above is a convex optimization problem.
+\end{proposition}
+The proof is left as an exercise for the reader.
+
+** Solution
+
+\begin{theorem}[solution, full column rank $X$]
+        Assume that $X$ is full column rank, that is, $X$ has rank $d$. Then, the solution $w$ of linear least squares regression is given by
+        $$
+                w = (X^\top X)^{-1}X^\top Y.
+        $$
+\end{theorem}
+
+\begin{proof}
+        We write the objection function as follows
+        $$
+                obj(w) := \frac{1}{2} \norm{Y - Xw}^2.
+        $$
+        Taking the gradiant with respect to $w$, we obtain
+        $$
+                \nabla obj(w) = -X^\top(Y - Xw).
+        $$
+        Setting the gradient to zero gives the necessary condition
+        $$
+                X^\top Y = (X^\top X) w.
+        $$
+        Ideally, we would like to solve this for $w$.
+        Note that since we assume $X$ is rank $d$, then $X^\top X$ also has rank $d$. Therefore, $X^\top X$ is invertible. Hence, we can solve for $w$ by
+        $$
+                w = (X^\top X)^{-1} X^\top Y.
+        $$
+\end{proof}
+
+* Ridge Regression
+
+We want to improve standard $L_2$ -regression. There are two points of view:
+1. We want to have a unique solution, no matter what the rank of the data matrix is. This is going to improve numerical stability.
+2. In the standard problem, the coefficients $w_i$ can become very large. This leads to a high variance of the results. To avoid this effect, we want to introduce regularization to force the coefficients to stay "small".
+
+** Ridge regression problem
+
+Consider the following regularization problem: Let $\mathcal{X}$ denote an arbitrary input sapce and let $\mathcal{Y} = \mathbb{R}$ denote the output space. We fix a set of basis functions $\Phi_1, \dots, \Phi_D : \mathcal{X} \to \mathbb{R}$. As the function space, we choose all functions of the form $f(x) = \sum_i w_i \Phi_i(x)$. As regularizer, we use $\Omega(f) := \norm{w}^2$ with a regularization constant $\lambda > 0$. Then, we solve the following problem:
+$$
+        w_{n, \lambda} := \arg \min_{w \in \mathbb{R}^D} \frac{1}{n} \norm{Y - \Phi w}^2 + \lambda \norm{w}^2.
+$$
+
+** Solution
+
+\begin{theorem}[solution of ridge regression]
+The coefficients $w_{n, \lambda}$ that solve the ridge regression problem are given as
+$$
+        w_{n, \lambda} := (\Phi^\top \Phi + n \lambda I_D)^{-1} \Phi^\top Y
+$$
+where $I_D$ is the $D \times D$ identity matrix.
+\end{theorem}
+
+\begin{proof}
+Consider the objective function
+$$
+        Obj(w) := \frac{1}{n} \norm{Y - \Phi w}^2 + \lambda \norm{w}^2.
+$$
+Note that this function is convex. Taking the derivative with respect to $w$ and set it to 0, we have
+$$
+\nabla Obj(w) = - \frac{2}{n} \Phi^\top (Y - \Phi w) + 2 \lambda w = 0 \implies (\Phi ^ \top \Phi + n \lambda I_D) w_{n, \lambda} = \Phi^\top Y
+$$
+It is straight forward to see that the matrix $\Phi ^ \top \Phi + n \lambda I_D$ has full rank whenever $\lambda > 0$. So, we can tak ethe inverse, and the thoerem follows as in the standard $L_2$ -regression case.
+\end{proof}
+
+* LASSO
+
+** Sparsity
+
+Consider the setting of linear regression with basis functions $\Phi_1, \dots, \Phi_D$. It is very desirable to obtain a solution function $f_n := \sum_i w_i \Phi_i$ for which many of the coefficients $w_i$ are zero. Such a solution is called sparse. This is because even if we have many basis functions, we just need to evalute a few of them, meaning that it saves computational resources. Moreover, the sparsity improves the interpretability of the solution.
+
+** A naive regularizer for sparsity
+
+We need to find a function that is small if $w$ is sparse. The following regularizer
+$$
+\Omega_0(f) := \sum^D_{i=1} \mathbb{1}_{w_i \ne 0}
+$$
+directly penalizes the number of non-zero entries $w_i$. However, using this regularizer is not a good idea. This is because $\Omega_0$ is a discrete function and optimizing such a function is NP-hard.
+
+** $p$ -norms
+
+\begin{definition}[$p$ -norm]
+For $p > 0$, define for a vector $w \in \mathbb{R}^D$. The $p$ -norm of this vector $w$ is
+$$
+        \norm{w}_p := \left(\sum^D_{i = 1} | w_i | ^ p \right) ^ {\frac{1}{p}}
+$$
+when $p \ge 1$. This norm function is also convex.
+\end{definition}
+
+** Sparsity and the $L_1$ -norm
+
+We want to settle for $\norm{w}_1$ as a regularizer. It is "as close" to the non-convex zero-norm as possible while still being convex. Moreoever, the $L_1$ -norm also tend to give sparse solutions.
+
+** The LASSO problem
+
+Consider the following regularization problem: Let $\mathcal{X}$ denote an arbitrary input sapce and let $\mathcal{Y} = \mathbb{R}$ denote the output space. We fix a set of basis functions $\Phi_1, \dots, \Phi_D : \mathcal{X} \to \mathbb{R}$. As the function space, we choose all functions of the form $f(x) = \sum_i w_i \Phi_i(x)$. As regularizer, we use $\Omega(f) := \norm{w}_1$ with a regularization constant $\lambda > 0$. Then, we solve the following problem:
+$$
+        w_{n, \lambda} := \arg \min_{w \in \mathbb{R}^D} \frac{1}{n} \norm{Y - \Phi w}^2 + \lambda \norm{w}_1.
+$$
+
+** Solution
+
+The Lasso objective function is convex. However, there doese not exist a closed form solution. Hence, it has to be solved by a standard algorithm for convex optimization.
+
+* Cross Validation
+
+** Purpose
+
+In all machine learning algorithms, we have to set parameters or make design decisions:
+- Regularization parameter in ridge regression or LASSO
+- Parameter $C$ of the SVM
+- Parameter $\sigma$ in the Gaussian kernel
+- Number of principle components in PCA
+- But you also might want to figure out whether certain design choices make sence, for example, whether it is useful to remove outliers in the beginning or note.
+It is very important that all these choices are made appropriately. Cross validation is the method of choice for doing that.
+
+** K-fold cross validation
+
+The input of K-fold cross validation are the training points $(X_i, Y_i)_{i = 1, \dots, n}$ and a set $S$ of different parameter combinations. We first partition the training set into $K$ parts that are equally large. There parts are called "fold". Then, for all choices of parameters $s \in S$ and for $k = 1, \dots, K$, we build one training set out of folds $1, \dots, k-1, k + 1, \dots, K$ and train with parameter $s$. Then, we compute the validation error $err(s, k)$ on fold $k$. After we compute $err(s, k)$ for all k, we compute the average validation error over the folds: $err(s) = \frac{1}{K} \sum^K_{k=1} err(s, k)$. We select the paramter combination $s$ that leads to the best validation error $s^\star = \arg \min_{s \in S} err(s)$.
+
+Once you selected the parameter combination $s^\star$, you train your classifier a final time on the whole training set. Then, you use a completely new test set to compute the test error.
+
+Never, never use your test set in the validation phase. As soon as the test points enter the learning algorithm in any way, they can no longer be used to compute a test error. The test set must not be used in training in any way!
+
+In particular, you are not allowed to first train using cross validation, then compute the test error, realize that it is not good. Then, train again until the test error gets better. As soon as you try to improve the test error, the test data effectively gets part of the training procedure and is spoiled.
+
+* Risk Minimization vs. Probabilistic Approaches
+
+** ERM = maximum likelihood
+
+Assume the following probabilistic setup: the data is generated by the following linear model:
+$$
+        Y = Xw + \varepsilon
+$$
+where $w$ is unknown and the noise $\varepsilon$ follows a $d$ dimensional normal distribution $N(0, \sigma^2 I)$. Together, we have
+$$
+        Y | X, w \sim N(Xw, \sigma^2 I).
+$$
+In the maximum likelihood framework, we want to find the parameter $w$ such that the likelihood of the observations is maximized:
+$$
+\max_w P(Y | X, w) = \max_w \exp(-\norm{Y - Xw}^2 / \sigma^2) = \min_w \norm{Y - Xw}^2.
+$$
+This shows that maximum likelihood regressoin with a Gaussian noise model corresponds to ERM with the $L_2$ loss function.
+
+** RRM = Bayesina MAP
+
+Assume that the observations are generated as above, but additionally assume that we have a prior distribution over the parameter $w$:
+$$
+        Y | X, w \sim N(Xw, \sigma^2 I) \quad \text{and} \quad w \sim N(0, \tau^2 I).
+$$
+In Bayesian maximum a posteriori approach, we choose $w$ that maximizes the posterior probability:
+$$
+P(w | X, Y) = \frac{P(Y | X, w)P(w)}{P(Y|X)}.
+$$
+Writing down all formulas, we reach to ridge regression with $\lambda = \sigma^2 / \tau^2$:
+$$
+\min_w \norm{Xw - Y}^2 + \lambda \norm{w}^2.
+$$
+
+** Bayesian interpretation of ERM and RRM
+
+- The noise model in the probabilistic setup corresponds to the choice of a loss function in teh ERM framework.
+- The prior distribution of the parameter in the Bayesian model corresponds to a particular choice of regularizer in RRM.
+- If the data contains many outliers, one chooses a Laplace noise model (rather than a Gaussian one), we have $L_1$ loss function. Similarly, if we use a Laplace prior instead of a normal prior for the parameter, we end with LASSO regularization.
+
+* Logistic Regression
+
+Although it's called regression, it solves a classification problem.
+
+** Logistic regression problem as ERM
+
+Want to solve classification on $\mathbb{R}^d$ with linear functions:
+- Given $X_i \in \mathbb{R}^d, Y_i \in \{ \pm 1 \}$
+- $\mathcal{F} = \{ f(x) = w^\top x + b; w \in \mathbb{R}^d; b \in \mathbb{R} \}$
+- Use ERM
+- Logistic loss function
+  $$
+  \ell(X, f(X), Y) = \log_2 (1 + \exp(-Y f(X)))
+  $$
+  This loss function starts to punish if points are still on the correct side of the hyperplane, but get close to it. Once on the wrong side, it punishes "moderately" (close to linear).
+
+
+** Computing the ERM solution
+
+Consider the problem of finding the best linear function under the logistic loss in the ERM setting. There is no closed form solution for this problem. But, the logistic loss function is convex. So we can use solver to obtain the logistic regression solution. But why would someone come up with the logistic loss function? The answer comes form the following Bayesian approach to classification.
+
+** The logistic model
+
+We do not make a full model of joint probability distribution $P(x, y)$ or the class conditional distributions $P(y |x)$. We just specify a model for the conditional kposterior distributions
+$$
+P(Y = y | X = x) = \frac{1}{1 + \exp(-yf(x))}
+$$
+with $f(x) = w^\top x + b$. Here, $w$ and $b$ are the parameters. The function $\frac{1}{ 1 + \exp(-t)}$ is called the logistic function.
+
+* Lagrangian
+
+We now want to derive a recipe by which many convex optimization problems can be analyzed /rewritten / solved.
+
+** Gradient of a function
+
+Consider a function $f: \mathbb{R}^d \to \mathbb{R}$. The gradient of $f$ is the vector of partial derivatives. For each $x$, the gradient $\nabla f(x)$ points in the direction where the funciton increases most.
+
+** Lagrange multiplier for equality constraints
+
+Consider the following convex optimization problem
+
+\begin{align*}
+\min &\quad f(x) \\
+\text{subject to} &\quad g(x) = 0
+\end{align*}
+where $f$ and $g$ are convex.
+
+If $g$ is convex, then its sublevel-sets are convex, where sublevel set is $\{x | g(x) \le c\}$.
+
+*** Gradient of equality constraint
+
+For any point $x$ on the surface $\{g(x) = 0\}$, the gradient $\nabla g(x)$ is orthogonal to the surface itself. The intuition here is that to increase / decrease $g(x)$, you need to move away from the surface, not walk along the surface.
+
+*** Gradient of objective function
+
+Consider the points $x^\star$ on the surface $\{ g(x) = 0\}$ for which $f(x)$ is minimized. This point must have the property that $\nabla f(x)$ is orthogonal to the surface. The intutition is that otherwise we could move a little along the surface to decrease $f(x)$. As a consequence, at the optimal point, $\nabla g(x)$ and $\nabla f(x)$ are parallel, that is, there exists some $\nu \in \mathbb{R}$ such that $\nabla f(x) + \nu \nabla g(x) = 0$.
+
+*** Lagrange multiplier
+
+We now define the Lagrangian function
+$$
+L(x, \nu) = f(x) + \nu g(x)
+$$
+where $\nu \in \mathbb{R}$ is a new variable called Lagrange multiplier. Now observe that
+- The condition $\nabla f(x) + \nu \nabla g(x) = 0$ is equivalent to $\nabla_x L(x, \nu) = 0$
+- The condition $g(x) = 0$ is equivalent to $\nabla_\nu L(x, \nu) = 0$
+To find an optimal point $x^\star$, we need to find a saddle point of $L(x, \nu)$, that is, a point such that both $\nabla_x L(x, \nu)$ and $\nabla_\nu L(x, \nu)$ vanish.
+
+** Lagrange multiplier for inequality constraints
+
+Consider the following convex optimization problem:
+\begin{align*}
+\min &\quad f(x) \\
+\text{subject to} &\quad g(x) \le 0
+\end{align*}
+where $f$ and $g$ are convex. We now distinguish two cases: constraint is active or inactive.
+
+*** Active case
+
+Constraint is active, that is, the optimal point is on the surface $g(x) = 0$. Again, $\nabla f$ and $\nabla g$ are parallel in the optimal point. So, we have $\nabla f(x) = - \lambda \nabla g(x)$.
+
+*** Inactive case
+
+Constraint is inactive, that is, the optimal point is not on the surface $g(x) = 0$, but somewhere in the interior. Then, we have $\nabla f = 0$ at the solution. We do not have any condition on $\nabla g$.
+
+*** Lagrange multiplier
+
+We can summarize both cases using the Lagrangian again. We now define the Lagrangian
+$$
+L(x, \lambda) = f(x) + \lambda g(x)
+$$
+where the Lagrange multiplier has to be positive: $\lambda \ge 0$.
+
+- case 1: constraint active, $\lambda > 0$.
+  - Need to find a saddle point: $\nabla_x L(x, \lambda) = \nabla_\lambda L(x, \lambda) = 0$.
+- case 2: constraint inactive, $\lambda = 0$.
+  - Need to find the point where $\nabla_x L(x, \lambda) = \nabla_x f(x) = 0$.
+
+So in both cases, we have again a saddle point of the Lagrangian.
+
+** Lagrangian and dual
+
+Consider the primal optimization problem
+
+
+\begin{align*}
+        \min              &\quad f_0(x)                               \\
+        \text{subject to} &\quad f_i(x) \le 0 \quad (i = 1, \dots, m) \\
+                          &\quad h_j(x)   = 0 \quad (j = 1, \dots, k)
+\end{align*}
+
+Denote by $x^\star$ a solution of the problem and by $p^\star := f_0 (x^\star)$ the objective value at the solution. Define the corresponding Lagrangian as follows. For each equality constraint $j$, introduce a new variable $\nu_j \in \mathbb{R}$ and for each inequality constraint $i$ introduce a new variable $\lambda_i \ge 0$. These variables are called Lagrangian multipliers. Then, define
+$$
+L(x, \lambda, \nu) = f_0(x) + \sum^m_{i=1} \lambda_i f_i(x) + \sum^k_{j=1} \nu_j h_j(x).
+$$
+Define the dual function $g: \mathbb{R}^m \times \mathbb{R}^k \to \mathbb{R}$ by
+$$
+g(\lambda, \nu) = \inf_x L(x, \lambda, \nu).
+$$
+
+** Dual function as lower bound on primal
+
+\begin{proposition}[dual function is concave]
+No matter whether the primal problem is convex or not, the dual function is always concave in $(\lambda, \nu)$.
+\end{proposition}
+\begin{proof}
+For fixed $x$, $L(x, \lambda, \nu)$ is linear in $\lambda$ and $\nu$ and thus concave. The dual function as a pointwise infimum over concave functions is concave as well.
+\end{proof}
+
+\begin{proposition}[dual function as lower bound on primal]
+For all $\lambda_i \ge 0$ and $\nu_j \in \mathbb{R}$, we have $g(\lambda, \nu) \le p^\star$.
+\end{proposition}
+\begin{proof}
+Let $x_0$ be a feasible point of the primal problem, that is, a point that satisfies all constraints. For such a point, we have
+$$
+\sum^m_{i=1} \lambda_i f_i(x_0) + \sum^k_{i=1} \nu_j h_j(x_0) \le 0.
+$$
+This implies that
+$$
+L(x_0, \lambda, \nu) = f_0(x_0) + \sum^m_{i=1} \lambda_i f_i(x_0) + \sum^k_{i=1} \nu_j h_j(x_0) \le f_0(x_0).
+$$
+Note thatthis property holds in particular when $x_0$ is $x^\star$. Moreover, for any $x_0$, and in particular $x_0 := x^\star$, we have
+$$
+\inf_x L(x, \lambda, \nu) \le L(x_0, \lambda, \nu).
+$$
+Combining the last two properties, we have
+$$
+g(\lambda, \nu) \le f_0(x^\star).
+$$
+\end{proof}
+
+** Dual optimization problem
+We have seen that the dual function provides a lower bound on the primal value. Finding the highest such lower bound is the task of the dual problem. We deifne the dual optimization problem as
+$$
+\max_{\lambda, \nu} g(\lambda, \nu) \quad \text{subject to} \quad \lambda_i \ge 0, \nu_j \in \mathbb{R}.
+$$
+Denote the solution of this problem by $\lambda^\star, \nu^\star$ and the corresponding objective value $d^\star := g(\lambda^\star, \nu^\star)$.
+** Weak duality
+\begin{proposition}[weak duality]
+The solution $d^\star$ of the dual problem is always a lower bound for the solution of the primal problem, that is, $d^\star \le p^\star$.
+\end{proposition}
+We call the difference $p^\star - d^\star$ the duality gap.
+** Strong duality
+We say that strong duality holds if $p^\star = d^\star$. This is not always the case, just under particular conditions. Such conditions are called constraint qualifications in the optimization literature. Convex optimization problem often satisfy strong duality, but not always. Linear problems and quadratic problems always have strong duality.
+
+* Linear Support Vector Machine
+** Geometric motivation
+
+Given a set of linearly separable data points in $\mathbb{R}^d$. Which hyperplane should we take? The main idea of SVM is to take the hyperplane with the largest distance to both classes (large margin). Why might this make sense?
+- Robustness: assume our data points are noisy. If we "wiggle" some of the points, then they are still on the same side of the hyperplane. so the classification result is robust on the training points. Later we will see that the size of the margin can be interpreted as a regularization term. The larger the margin, the less complex the corresponding function class.
+
+** Canonical hyperplane
+
+We are interested in a linear classifier of the form
+$$
+f(x) = \mathrm{sign}(w^\top x + b).
+$$
+Note that if we multiply $w$ and $b$ by the same constant $a > 0$, this does not change the classifier:
+$$
+\mathrm{sign}((aw)^\top x + ab) = \mathrm{sign}(a(w^\top x + b)) = \mathrm{sign}(w^\top x + b).
+$$
+We want to remove this degree of freedom. For now, assume data can be perfectly separated by hyperplane.
+
+We say that the pair $(w, b)$ is in canonical form with respect to the points $x_1, \dots, x_n$ if they are scaled such that
+$$
+\min_{i = 1, \dots, n} | w^\top x_i  + b| = 1.
+$$
+We also say that the hyperplane is in canonical representation.
+
+** The margin
+
+Let $H := \{ x \in \mathbb{R}^d | w^\top x + b = 0\}$ be a hyperplane. Assume that a hyperplane correctly separates the training data. The margin of the hyperplane $H$ with respect to the training points $(X_i, Y_i)_{i=1, \dots, n}$ is defined as the minimal distance of a training point to the hyperplane:
+$$
+\rho(H, X_1, \dots, X_n) := \min_{i=1,\dots,n} d(H, X_i) := \min_{i = 1, \dots, n} \min_{h \in H} \norm{X_i - h}.
+$$
+
+\begin{proposition}[margin]
+For a hyperplane in canonical representation, the margin $\rho$ can be computed by $\rho = \frac{1}{\norm{w}}$.
+\end{proposition}
+\begin{proof}
+By the definition of the hyperplane, the points on the hyperplane itself satisfy $w^\top x + b = 0$. By the definition of canonical representation, the points that sit on the margin satisfy $w^\top x + b = \pm 1$. let $x$ be the training point that is closest to the hyperpalne. That is, the one that defines the margin. With out loss of generality, assume that $w^\top x + b = 1$. Let $h \in H$ be the closest point to $x$ on the hyperplane. Then, $\norm{x - h} = \rho$. We also know that
+$$
+x = h + \rho \frac{w}{\norm{w}}
+$$
+because the line connecting $x$ and $h$ is in the normal direction $w$ and has lenght $\rho$. Now, we build the inner product with $w$ and $b$ on both sides:
+\begin{align*}
+w^\top x &= w^\top h + \rho \frac{w^\top w }{\norm{w}} \\
+w^\top x &= w^\top h + \rho \frac{\norm{w}^2}{\norm{w}} \\
+w^\top x  + b &= w^\top h + b + \rho \frac{\norm{w}^2}{\norm{w}} \\
+1 &= 0 + \rho \frac{\norm{w}^2}{\norm{w}} \\
+1 &= \rho \norm{w} \\
+\rho &= \frac{1}{\norm{w}}.
+\end{align*}
+\end{proof}
+
+** Hard margin SVM
+
+So, here is our frist formulation of the SVM optimization problem:
+1. Maximize the margin
+2. Subject to:
+   1. all points are on the correct side of the hyperplane
+   2. all points are outside of the margin
+
+In formulas, we have
+\begin{align*}
+        \max_{w \in \mathbb{R}^d, b \in \mathbb{R}} &\quad \frac{1}{\norm{w}} \\
+        \text{subject to} &\quad \mathrm{sign}(w^\top X_i + b) = Y_i \quad \forall i = 1, \dots, n \\
+        &\quad |w^\top X_i + b| \ge 1 \quad \forall i = 1, \dots, n
+\end{align*}
+
+Usually, we consider the following equivalent optimization problem
+
+\begin{align*}
+        \min_{w \in \mathbb{R}^d, b \in \mathbb{R}} &\quad \frac{1}{2}\norm{w}^2 \\
+        \text{subject to} &\quad Y_i(\mathrm{sign}(w^\top X_i + b)) \ge 1 \quad \forall i = 1, \dots, n \\
+\end{align*}
+
+We remark that this optimization problem is convex. In fact, it is a quadratic optimization problem. Observe that the solution will always be a hyperpalne in canonical form. The only reason we add a constant of $1/2$ in front of $\norm{w}^2$ is for mathematical convenience.
+
+A big disadvantage of hard margin SVM is that the problem only has a solution if the dataset is linearly separable. That is, there exists a hyperplane $H$ that separates all training points without error. This might be too strict.
+
+** Soft margin SVM
+
+We want to allow for the case that the separating hyperplane makes some errors (that is, it does not perfectly separate the training data). TO this end, we introduce "slack variables" $\xi_i$ and consider the following new optimization problem:
+
+\begin{align*}
+        \min_{w \in \mathbb{R}^d, b \in \mathbb{R}} &\quad \frac{1}{2}\norm{w}^2 + \frac{C}{n} \sum^n_{i=1} \zeta_i\\
+        \text{subject to} &\quad Y_i(\mathrm{sign}(w^\top X_i + b)) \ge 1 - \zeta_i \quad \forall i = 1, \dots, n \\
+&\quad \zeta_i \ge 0 \quad \forall i = 1, \dot, n\\
+\end{align*}
+
+Here, $C$ is a constant that controls the tradeoff between the two terms. The problem is called the primal soft margin SVM problem. Note that this is till a convex quadratic program.
+
+*** Interpretation
+
+1. If $\xi_i = 0$, then the point $X_i$ is on the correct side of the hyperplane, outside the margin.
+2. If $\xi_i \in (0, 1)$, then the point $X_i$ is still on the correct side of the hyperplane, but inside the margin.
+3. If $\xi_i > 1$, then $X_i$ is on the wrong side of the hyperplane.
+
+Note that for soft SVMs, the margin is defined implicitly. The points on the margin are the ones that satisfy $w^\top x + b = \pm 1$.
+
+** SVM as regularized risk minimization
+
+We want to intepret the SVM in the regularization framework:
+$$
+\min \frac{1}{2} \norm{w}^2 + \frac{C}{n} \sum^n_{i=1} \xi_i
+$$
+where we consider the term $\frac{1}{2} \norm{w}^2$ as the regularization term and the $\frac{C}{n} \sum^n_{i=1} \xi_i$ as the risk term. To this end, we want to incorporate the constraints into the objective to form a new loss function. Consider the constraint $Y_i (w^\top X_i + b) \ge 1 - \xi_i$. Exploiting the constraint that $\xi_i \ge 0$, we can rewrite it as follows:
+$$
+\xi_i \ge \max(0, 1 - Y_i(w^\top X_i + b)).
+$$
+The loss function is the so called hinge loss:
+$$
+\ell(x, y, f(x)) = \max(0, 1 - y f(x)).
+$$
+This loss function has a couple of interesting properties:
+- It even punishes points if they have the correct label but are too close to the decision surface (the margin). For points on the wrong side, it increases linearly, like an $L_1$ norm, not quadratic.
+
+With hinge loss, we can now interpret the soft margin SVM as regularized risk minimization
+$$
+\min_{w, b} \frac{C}{n} \sum^n_{i=1} \max(0, 1 - Y_i (w^\top X_i + b)) + \norm{w}^2.
+$$
+
+* Dual Problem of Support Vector Machine
+
+It turns our that all the important properties of SVM can only be seen from the dual optimization problem So, let use derive the dual problem.
+
+** Dual of hard margin SVM
+
+Primal problem:
+\begin{align*}
+\min_{w \in \mathbb{R}^d, b \in \mathbb{R}} &\quad \frac{1}{2} \norm{w}^2 \\
+\text{subject to} &\quad Y_i(w^\top X_i + b) \ge 1 \quad \forall i = 1, \dots, n
+\end{align*}
+
+Lagrangian: we introduce one Lagrange multiplier $\alpha_i \ge 0$ for each constraint and write down the Lagrangian:
+$$
+L(w, b, \alpha) = \frac{1}{2} \norm{w}^2 - \sum^n_{i=1} \alpha_i (Y_i(w^\top X_i + b) - 1)
+$$
+
+Formally, the dual problem is the following:
+Dual function:
+$$
+g(\alpha) = \min_{w, b} L(w, b, \alpha)
+$$
+Dual problem:
+$$
+\max_\alpha g(\alpha) \text{ subject to } \alpha_i \ge 0, 1, \dots, n
+$$
+But this is pretty abstract, we would need to first compute the dual function, but this seems non-trivial. We now show how to compute $g(\alpha)$ explicitly. Let's try to simplify the Lagrangian first.
+
+Saddle point condition: We know that at the solution of the primal, the saddle point condition has to hold. In particular,
+$$
+\frac{\partial}{\partial b} L(w, b, \alpha) = - \sum^n_{i=1} \alpha_i Y_i = 0,
+$$
+$$
+\frac{\partial}{\partial w} L(w, b, \alpha) = w - \sum^n_{i=} \alpha_i Y_i X_i = 0.
+$$
