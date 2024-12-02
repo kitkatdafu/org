@@ -1040,3 +1040,10 @@ $$
 $$
 \frac{\partial}{\partial w} L(w, b, \alpha) = w - \sum^n_{i=} \alpha_i Y_i X_i = 0.
 $$
+
+* Positive Definite Kernels
+
+** Linear methods - disadvantages
+
+We have seen several linear methods for regression and classification. Even though these methods are conceptualy appealing, they have a number of disadvantages.
+- Linear functions are restrictive. 
