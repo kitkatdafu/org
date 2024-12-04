@@ -2,7 +2,7 @@
 #+AUTHOR: Reid Chen
 #+EMAIL: reid.chen@wisc.edu
 #+OPTIONS: email:t
-#+LATEX_HEADER: \input{/Users/yichen/projects/header.tex}
+#+LATEX_HEADER: \input{header.tex}
 
 * Machine Learning and Inductive Bias
 ** What is machine learning?
@@ -1046,4 +1046,7 @@ $$
 ** Linear methods - disadvantages
 
 We have seen several linear methods for regression and classification. Even though these methods are conceptualy appealing, they have a number of disadvantages.
-- Linear functions are restrictive. 
+- Linear functions are restrictive. This can be of advantage to avoid overfitting, but often it leads to underfitting. For example, in classification, we could not find any hyperplane to separate two moons.
+- Alternatviely, we could use a feature map with basis functions $\Phi_i$ to represent more complex functions, say polynomials. But:
+  - It is not so obvious which are "good" basis functions.
+  - We need to fix the basis before we see the data. This means that we need to have very many basis functions to be flexible. This leads to a very high dimensional representations of our data.
