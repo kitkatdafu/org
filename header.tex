@@ -1,0 +1,63 @@
+\usepackage[utf8]{inputenc}
+
+%Typing a % in front of something makes a comment
+%----------Packages----------
+\usepackage{graphicx}
+\usepackage[font=footnotesize,skip=-10pt]{caption}
+\usepackage{mathpazo}
+\usepackage{amsmath} %%Mathpackage
+\usepackage{amssymb} %%Mathpackage
+\usepackage{amsthm} %%Mathpackage
+\usepackage{nicefrac}
+\usepackage{dsfont}
+\usepackage{mathrsfs}
+\usepackage{stmaryrd}
+\usepackage{enumerate} %%To use the enumerate environment
+\usepackage{verbatim} %%Shows the text as typed
+\usepackage{fullpage}  %%smaller margins
+\usepackage[T1]{fontenc}
+\usepackage{palatino}
+
+
+%----------Theorems----------
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{axiom}{Axiom}
+
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{nondefinition}[theorem]{Non-Definition}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{warning}[theorem]{Warning}
+\newtheorem*{goal}{Goal}
+
+
+% Marcos
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\B}{\mathbb{B}}
+\newcommand{\I}{\mathbb{I}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\p}{\partial}
+\renewcommand{\vec}[1]{\mathbf{#1}}
+\newcommand{\vx}{\vec{x}}
+\newcommand{\vp}{\vec{p}}
+\newcommand{\sep}{\,:\,}
+\newcommand{\Trans}{\mathsf{T}}
+
+% Probability Related Marcos
+\newcommand{\Prob}[1]{\mathbb{P}(#1)}
+\newcommand{\Exp}[1]{\mathbb{E}[#1]}
+\newcommand{\Ind}[2]{I_{#1}(#2)}
+\newcommand{\folo}{\sim}
+\newcommand{\geo}[2]{\textrm{Geometric}_{#1}(#2)}
+\newcommand{\poi}[1]{\textrm{Poisson}(#1)}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+
