@@ -1,0 +1,96 @@
+#+TITLE: Notes on Measure Theoretic Probability Theory
+#+AUTHOR: Reid Chen
+#+EMAIL: reid.chen@wisc.edu
+#+OPTIONS: email:t
+#+LATEX_HEADER: \input{header.tex}
+
+\begin{abstract}
+This is a graduate course on probability theory, a mathematical study of random phenomena
+It is a rigorous measure-theoretic apporach for probability, with no background needed on measure theory.
+\end{abstract}
+
+* Probability Spaces
+** Measurable Spaces
+*** Random Experiment
+\begin{definition}[Random experiment] 
+A random experiment is an experiment whose outcome is uncertain in the sense that it cannot be determined before the experiment is performed.
+\end{definition}
+\begin{definition}[Sample space]
+The set of all possible outcomes in a random experiment is called the sample space of the experiment, denoted usually by $\Omega$.
+\end{definition}
+
+An outcome of the sample space is denoted by $\omega \in \Omega$.
+
+**** Throwing a Die
+
+There are 6 possible outcomes when we throw a die. Therefore, the sample space contains six elements. If we use numbers 1 to 6 to denote the numbers on the faces of a die, then the sample spaces
+$$
+\Omega = \{1, 2, 3, 4, 5, 6\}.
+$$
+Of course, you do not need to constraint yourself from using the numbers. You can also replace the numbers with the faces of a die. Note that the sample space $\Omega$ we have here is finite.
+
+**** Bacteria Population
+
+Suppose you have a petridish in which you grow bacteria. We wait for a day for the bacteria to form a population. The outcome is then the size of the population. The sample space would be
+$$
+\Omega = \{0, 1, 2, \dots\} = \mathbb{Z}_+.
+$$
+Note that this set is infinite and countable.
+
+**** Motion on a Line
+
+Suppose you have a line $\mathbb{R}$ and you have a person moving randomly on the line. Let the person moves for an hour. Where does the person stand when you are back?
+The outcome in this case is the position of the bee. So, the sample space is $\mathbb{R}$.
+
+**** Tossing a Coin Once
+
+$$
+\Omega = \{\text{H}, \text{T}\}.
+$$
+
+**** Tossing a Coin Five Times
+
+$$
+\Omega = \{\omega = (\omega_1, \dots, \omega_5) \mid \omega_i \in \{\text{H}, \text{T}\} \}.
+$$
+Each $\omega$ is a finite sequence, a 5-tuple.
+
+**** Tossing a Coin Forever
+
+$$
+\Omega = \{ \omega = (\omega_1, \omega_2, \dots) = (\omega_i)_{i \in \mathbb{N}} \mid \omega_i \in \{\text{H}, \text{T}\} \}
+$$
+Each $\omega$ is an (infinite) sequence. $\Omega$ is uncountable.
+
+*** Countable vs. Uncountable Set
+
+\begin{definition}[Countable]
+A set $A$ is called countably infinite if there is a bijection
+$$
+f: \mathbb{N} \to A,
+$$
+where $\mathbb{N} = \{1, 2, 3, \dots \}$.
+\end{definition}
+
+Here are some countable sets:
+
+\begin{itemize}
+\item $\mathbb{Z} = \{\dots, -3, -2, -1, 0, 1, 2, 3, \dots \}$
+\item $\mathbb{N} ^ 2 = \{(n_1, n_2) \mid n_1, n_2 \in \mathbb{N} \}$
+\item $\mathbb{Q} = \{ \frac{a}{b} \mid a, b \in \mathbb{Z}, b \ne 0 \}$
+\item $A^n$
+\end{itemize}
+
+Here are some uncountable sets:
+
+\begin{itemize}
+\item $\mathbb{R}$
+\item $\mathbb{R} \setminus \mathbb{Q}$
+\end{itemize}
+That is, they are infinite bu tnot countably infinite.
+
+* Random Variables
+* Random Vectors
+* Conditioning
+* Infinite Collections of Random Variables
+* Convergence

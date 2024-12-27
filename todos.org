@@ -1,0 +1,28 @@
+#+title: TODOS
+
+* DONE The Web Conference Rebuttal
+- Meet with Ramya to discuss the draft
+- Do simulation with different number of classes, tables
+        - Same something more, think about how clases interfere with the bias
+- Mention that existing noise models are not accurate (why the compelling evidence itself is important)
+- We do belive that the pattern be broadly applicable, highlight the nuances in the dogs3 and birds5 dataset
+- Crowdsourcing is in the call of the paper, well within the scope of the track and the Web
+- How we model the noises curucally depends on hwo we understand the contextual bias. It's all noise.
+- Contextual:
+        - hierchical relationship of the items, and give example
+- Future work:
+        - Consider ranking (ordered list)
+        - How to design new noise model
+                - incorporating the hierchical into the model
+- Existing work does not take these into acccount (contextual bias, hierchiy)
+
+- Looks like miss understanding, we have varying p, and the p is from SBM, which is the case where m = 2. What do you mean by the question, could you explain in more detail?
+- Please clarify: However, I assume the purpose of such models is for ground truth recovery
+
+* OKAY AISTATS Rebuttal
+- Meet with Gokcan to discuss the runtime performance experiment
+* TODO PabLO Faster Gradient Descent
+- ResNet18 + CIFAR10
+- Batched version
+- Implement using old loss
+- Implement using the new loss (with ReLU)

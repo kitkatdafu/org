@@ -1,0 +1,149 @@
+#+TITLE: Notes on Advanced Linear Algebra
+#+AUTHOR: Reid Chen
+#+EMAIL: reid.chen@wisc.edu
+#+OPTIONS: email:t
+#+LATEX_HEADER: \input{header.tex}
+
+* Graph Laplacians
+
+\begin{definition}[Graph]
+A graph $G$ is a pair of vertices $V$ and edges $E$, $G = (V, E)$.
+\end{definition}
+
+\begin{definition}[Adjacency matrix]
+The adjacency matrix $A_G = (a_ij) \in \mathbb{R}^{n \times n}$ is defined by
+$$
+a_{ij} = \begin{cases}
+    1 &\quad \text{if } ij \text{ is an edge in } $G$ \\
+    0 &\quad \text{otherwise}
+\end{cases}.
+$$
+\end{definition}
+
+\begin{definition}[Degree]
+Let $G$ be a graph. Let $i$ be a vertex of $G$. The degree of $i$ is the number of edges incident to vertex $i$. It is denoted as $d_i$.
+\end{definition}
+
+\begin{definition}[The  Laplacian of a graph]
+Let $D_G \in \mathbb{R}^{n \times n}$ be the diagonal matrix whose $i^\th$ is $d_i$. The Laplacian of $G$ is 
+$$
+L_G := D_G - A_G.
+$$
+\end{definition}
+
+\begin{theorem}[The Laplacian of a graph is PSD]
+The Laplacian of a graph is positive semidefinite.
+\end{theorem}
+
+\begin{proof}
+We are going to find a matrix $B$ such that $L_G = B_G^\top B_G$ for some matrix $B$.
+Define the matrix $B_G$, the "directed" node-edge incidence matrix of $G$.
+The columns of $B_G$ will be indexed by the edges of $G$. The rows of $B_G$ will be indexed by the nodes of $G$.
+The entry $ij$ of $B_G$ will be 1 if node $i$ is the start of edge $j$, -1 if the end, and 0 if it is not related to $j$.
+In other word, in the column indexed by the directed edge $ij$, we put 1 in row $i$ and -1 in row $j$.
+It turns our that $L_G = B_G^\top B_G$.
+This is because when you multiply the $i^\th$ row and $i^\th$ column, we get $1^2$ or $(-1)^2$ for every edge incident to $i$. So the sum is $d_i$.
+Moreover, when you multiply the $i^\th$ row and $j^\th$ column ($i \ne j$),  if $ij$ is an edge, you will get $1 (-1)  = -1$. 
+\end{proof}
+
+\begin{theorem}[Eigenvalue and eigenvector of the graph Laplacian]
+$\lambda = 0$ is always an eigenvalue of $L_G$ with eigenvector $\vec{1}$.
+\end{theorem}
+
+\begin{proof}
+By construction, each row of $L_G$ sums to one. Therefore, $L_G \vec{1} = \vec{0}$.
+\end{proof}
+
+\begin{lemma}
+If $G$ is a graph, the Laplacian $L_G$ is PSD and its eigenvalues are
+$$
+0 = \lambda_1 \le \dots \le \lambda_n
+$$
+and $\vec{1}$ is an eigenvector of $L_G$ with eigenvalue 0.
+\end{lemma}
+
+Since $L_G$ is positive semidefinite, $\vx^\top L_G \vx \ge 0$ for any $\vx \in \R^{n}$.
+
+\begin{proposition}
+Let $G = ([n], E)$ be the graph with vertices $[n]$ and edge set $E$. If $\vx = (x_1, \dots, x_n)^\top$, then
+$$
+\vx^\top L_G \vx = \sum_{ij \in E} (x_i - x_j)^2.
+$$
+\end{proposition}
+
+\begin{proof}
+We know that $L_G = B_G B_G^\top$. So $\vx^\top L_G \vx = \vx^\top B_G B_G^\top \vx$.
+By the construction of $B_G$, $\vx^\top B_G$ is indexed by the edges of $G$.
+The row indexed by edge $ij$ is going to have a value of $x_i - x_j$.
+Now, it's obvious to see that $\vx^\top B_G B_G^\top \vx = \sum_{ij \in E} (x_i - x_j)^2$.
+\end{proof}
+
+\begin{definition}[Connected graph]
+A graph $G$ is called connected is there is a way to walk from any vertex to any other vertex along the edges of $G$.
+\end{definition}
+
+\begin{theorem}
+A graph $G$ is connected if and only if $\lambda_2 > 0$.
+\end{theorem}
+
+\begin{proof}
+Suppose $G$ is not connected and suppose $G$ containes $k$ connected components.
+Then, there must be a $k$ blocks in $L_G$ such that each individual block times a $\vec{1}$ with correct size gives a zero matrix.
+With this, we can construct $k$ different eigenvectors that have eigenvalue of 0.
+Therefore, if $\lambda_1 \dots \lambda_k = 0$.
+
+Suppose $G$ is connected. For a symmetric matirx, $AM(\lambda) = GM(\lambda)$ for all eigenvalues $\lambda$.
+So, we need to show $GM(0) = 1$. Let $\vec{u}$ be any eigenvector with eigenvalue 0. Then, $L_G \vec{u} = \vec{0}$.
+This means that $\vec{u}^\top L_G \vec{u} = 0 = \sum_{ij \in E} (u_i - u_j)^2$. Hence, $(u_i - u_j)^2 = 0$ for all edges $ij \in E$.
+If $u_1 = c$ and $1k$ is an edge, then $u_k = c$. Since $G$ is connected, then $u$ is $c\vec{1}$. Therefore, $GM(0) = AM(0) = 1$.
+\end{proof}
+
+* Spectral Clustering
+
+\begin{definition}[Fiedler value and Fiedler vector]
+Let $0 = \lambda_1 \le \lambda_2 \le \dots \le \lambda_n$ be the eigenvalues of $L_G$, the Laplacian of a grpah $G$.
+Then, $\lambda_2$ is known as the Fiedler value and an eigenvector with eigenvalue $\lambda_2$ is called the Fiedler vector.
+\end{definition}
+
+We will use the Fiedler vector $\vec{w}$ and the graph Laplacian $L_G$ to understand clusters in a graph.
+
+\begin{definition}[Cut]
+A cut in $G$ is a partition of $V$ into two sets, $A$ and $V \setminus A$, where $A \subset V$.
+\end{definition}
+
+\begin{definition}[Density]
+The density of the cut induced by $A$ is
+$$
+\phi(A, V \setminus A) = |V| \frac{ |E(A, V \setminus A)|  }{ |A| \cdot |V \setminus A | }
+$$
+where $E(X, Y)$ denote all edges with one vertex in $X$ and one vertex in $Y$.
+\end{definition}
+The denominator counts the number of all possible edges between $A$ and $V \setminus A$, whereas the numerator counts the number of edges actually in the graph.
+
+\begin{definition}[Sparsest cut]
+Let $\phi_G$ denote the smallest possible density of a cut in $G$. Any cut with density $\phi_G$ is called a sparsest cut in $G$.
+\end{definition}
+
+Finding the sparest cut is NP-hard. Here, we give an algorithm that gives a fairly sparse cut.
+
+\begin{theorem}
+\phi_G \ge \lambda_2
+\end{theorem}
+
+\begin{theorem}
+The algorithm finds a cut of density at most
+
+$$
+4 \sqrt{d_G \lambda_2}
+$$
+
+where $d_G$ is the largest degree of a vertex in $G$.
+\end{theorem}
+
+The algorithm is vaguely described here. 
+#+BEGIN_SRC
+  1. Find the Fiedler vector
+  2. Argsort the Fiedler vector
+  3. Incrementally form a cut using the argsort
+  4. Compute the density of each cut
+#+END_SRC
