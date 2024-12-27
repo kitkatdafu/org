@@ -87,7 +87,58 @@ Here are some uncountable sets:
 \item $\mathbb{R}$
 \item $\mathbb{R} \setminus \mathbb{Q}$
 \end{itemize}
-That is, they are infinite bu tnot countably infinite.
+That is, they are infinite but not countably infinite.
+
+*** Events
+
+
+Informally speaking, an event is a statement about a random experiment whose truth is determined once the experiment is performed.
+More formally, an event can be defined as the set of all outcomes in the sample space for which the statement holds true.
+Mathematically, an event is a subset of the sample space:
+$$
+A \subset \Omega.
+$$
+
+How to decide if an event $A$ occur or not:
+\begin{itemize}
+\item perform the experiment
+\item look at the outcome $\omega$
+\item check if $\omega \in A$
+\item If $\omega \in A$, we say that $A$ has occured
+\item If $\omega \notin A$, we say that $A$ has not occured
+\end{itemize}
+
+**** Die
+
+The sample space is $\Omega =\{1, 2, 3, 4, 5, 6\}$. Let $A$ be the event that we see a prime number. That is, $A = \{ 2, 3, 5\}$.
+
+**** Bottle of Milk
+
+Suppose in the beginning you have one liter of milk and your roommate drinks some of it. We would like to know the amount of milk left.
+The sample space here is $\Omega = [0, 1]$. Let $A$ be the event that you have more than half of the bottle. Then, $A = (0.5, 1]$, which is an uncountable set.
+
+**** Observing the Price of a Stock
+
+If you are interested in the behavior of the price during a day, then an outcome is a continuous function that maps time to price.
+Now, the $\Omega$ is the set of all continuous functions from time to price. An event $A$ can be: the price hits the price level 5 at least once:
+$$
+A = \{\omega \in \Omega \mid \omega(t) = 5 \text{ for some } t\}.
+$$
+
+*** Probability
+
+Let $2^\Omega$ denote the set of all subsets of $\Omega$ (the power set of $\Omega$). We define probability as a function on the set of all events.
+For infinite sets, especially when $\Omega$ is uncountable, $2^\Omega$ is too big as the "right" collection of all events.
+Too big here means that it is mathematically inconvenient and has some uninteresting events.
+Therefore, we restrict ourselves from $2^\Omega$ to a smaller collection, say $\mathcal{F}$, which is a collection of subsets of $\Omega$.
+What properties should $\mathcal{F}$ satisfy?
+
+\begin{itemize}
+1. $\Omega \in \mathcal{F}$ (something happens)
+2. $\emptyset \in \mathcal{F}$ (nothing happens)
+3. $A \in \mathcal{F} \implies A^c \in \mathcal{F}$ (some statement happens, then the negative of this statement happens)
+4. $A, B \in \mathcal{F} A \cup B \in \mathcal{F}, A \cap B \in \mathcal{F}$
+\end{itemize}
 
 * Random Variables
 * Random Vectors
