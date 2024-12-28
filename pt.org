@@ -5,14 +5,14 @@
 #+LATEX_HEADER: \input{header.tex}
 
 \begin{abstract}
-This is a graduate course on probability theory, a mathematical study of random phenomena
+This is a graduate course on probability theory, a mathematical study of random phenomena.
 It is a rigorous measure-theoretic apporach for probability, with no background needed on measure theory.
 \end{abstract}
 
 * Probability Spaces
 ** Measurable Spaces
 *** Random Experiment
-\begin{definition}[Random experiment] 
+\begin{definition}[Random experiment]
 A random experiment is an experiment whose outcome is uncertain in the sense that it cannot be determined before the experiment is performed.
 \end{definition}
 \begin{definition}[Sample space]
@@ -125,7 +125,7 @@ $$
 A = \{\omega \in \Omega \mid \omega(t) = 5 \text{ for some } t\}.
 $$
 
-*** Probability
+*** $\sigma$ -algebra
 
 Let $2^\Omega$ denote the set of all subsets of $\Omega$ (the power set of $\Omega$). We define probability as a function on the set of all events.
 For infinite sets, especially when $\Omega$ is uncountable, $2^\Omega$ is too big as the "right" collection of all events.
@@ -134,11 +134,130 @@ Therefore, we restrict ourselves from $2^\Omega$ to a smaller collection, say $\
 What properties should $\mathcal{F}$ satisfy?
 
 \begin{itemize}
-1. $\Omega \in \mathcal{F}$ (something happens)
-2. $\emptyset \in \mathcal{F}$ (nothing happens)
-3. $A \in \mathcal{F} \implies A^c \in \mathcal{F}$ (some statement happens, then the negative of this statement happens)
-4. $A, B \in \mathcal{F} A \cup B \in \mathcal{F}, A \cap B \in \mathcal{F}$
+\item $\Omega \in \mathcal{F}$ (something happens)
+\item $\emptyset \in \mathcal{F}$ (nothing happens)
+\item $A \in \mathcal{F} \implies A^c \in \mathcal{F}$ (some statement happens, then the negative of this statement happens)
+\item $A, B \in \mathcal{F} A \cup B \in \mathcal{F}, A \cap B \in \mathcal{F}$
 \end{itemize}
+
+\begin{definition}[$\sigma$-algebra]
+Let $\Omega$ be a nonempty set. A collection $\mathcal{F}$ of subsets of $\Omega$ is said to be a $\sigma$-algebra of $\Omega$ if it satisfies the following properties:
+\begin{itemize}
+\item $\Omega \in \mathcal{F}$,
+\item $A \in \mathcal{F} \implies A^c \in \mathcal{F}$,
+\item $A_1, A_2, \dots \in \mathcal{F} \implies \bigcup_{i \in \mathbb{N}} A_i \in \mathcal{F}$.
+\end{itemize}
+\end{definition}
+
+\begin{definition}[Measurable space]
+In the case where $\mathcal{F}$ is a $\sigma$-algebra of a nonempty set $\Omega$, $(\Omega, \mathcal{F})$ is called a measurable space.
+\end{definition}
+
+\begin{definition}[sub-$\sigma$-algebra]
+If $\mathcal{G}$ is a $\sigma$-algebra on $\Omega$ with $\mathcal{G} \subset \mathcal{F}$, then $\mathcal{G}$ is called a sub-$\sigma$-algebra of $\mathcal{F}$.
+\end{definition}
+
+\begin{definition}[Measurable set]
+If $(\Omega, \mathcal{F})$ is a measurable space. Each element of $\mathcal{F}$ is called a measruable set of $\mathcal{F}$-measurable set.
+\end{definition}
+
+Let $(\Omega, \mathcal{F})$ be a measurable space. We have the following propositions:
+
+\begin{proposition}[$\emptyset$ is in $\mathcal{F}$]
+$$
+\emptyset \in \mathcal{F}.
+$$
+\end{proposition}
+
+\begin{proof}
+$\emptyset = \Omega^c \in \mathcal{F}$ since $\Omega \in \mathcal{F}$ by property 1 and $\mathcal{F}$ is closed under complement by property 2.
+\end{proof}
+
+\begin{proposition}[$\mathcal{F}$ is closed under finite unions]
+$$
+A_1, \dots, A_n \in \mathcal{F} \implies \bigcup_{i = 1}^{n} A_i \in \mathcal{F}.
+$$
+\end{proposition}
+
+\begin{proof}
+Let $A_{n + 1}, A_{n + 2}, \dots = \emptyset \in \mathcal{F}$ (by the previous proposition). Then, by property 3, we have $\bigcup_{i \in \mathcal{N}} A_i = \bigcup_{i=1}^n A_i \in \mathcal{F}$.
+\end{proof}
+
+\begin{proposition}[$\mathcal{F}$ is closed under countable intersections]
+$$
+A_1, A_2, \dots \in \mathcal{F} \implies \bigcap_{i \in \mathcal{N}} A_i \in \mathcal{F}.
+$$
+\end{proposition}
+
+\begin{proof}
+Note that
+$$
+\left(\bigcup_{i \in \mathcal{N}} A_i \right)^c = \left( \bigcap_{i \in \mathcal{N}} A_i^c \right).
+$$
+By property 3, the right hand side is in $\mathcal{F}$. Therefore, by 2, the complement of the left hand side is in $\mathcal{F}$.
+\end{proof}
+
+\begin{proposition}[$\mathcal{F}$ is closed under finite intersections]
+$$
+A_1, \dots A_n \in \mathcal{F} \implies \bigcap_{i = 1}^n A_i \in \mathcal{F}.
+$$
+\end{proposition}
+
+\begin{proof}
+\end{proof}
+
+\begin{proposition}[$\mathcal{F}$ is closed under set differences]
+$$
+A, B \in \mathcal{F} \implies A \setminus B \in \mathcal{F}.
+$$
+\end{proposition}
+
+\begin{proof}
+\end{proof}
+
+\begin{proposition}[$\mathcal{F}$ is closed under symmetric differences]
+$$
+A, B \in \mathcal{F} \implies (A \setminus B) \cup (B \setminus A) \in \mathcal{F}.
+$$
+\end{proposition}
+
+\begin{proof}
+\end{proof}
+
+*** Generated $\sigma$ -algebra
+
+Let $\Omega$ be a nonempty set. We know that $\mathcal{F} = 2^{\Omega}$ is the largest $\sigma$ -algebra on $\Omega$.
+Every $\sigma$ -algebra is a sub- $\sigma$ -algebra of $\mathcal{F}$. $\mathcal{F}$ here is called discrete $\sigma$ -algebra.
+
+Let $\mathcal{F} = \{\emptyset, \Omega\}$. It is known as the smallest $\sigma$ -algebra on $\Omega$, or the trivial $\sigma$ -algebra.
+
+How about $\sigma$ -algebra in between these two? Or, let $\mathcal{A}$ be a nonempty collection of subsets of $\Omega$. What is the smallest $\sigma$ -algebra that contains all the sets in $\mathcal{A}$?
+
+\begin{proposition}
+The intersection of an arbitrary collection of $\sigma$-algebras on $\Omega$ is a $\sigma$-algebra on $\Omega$.
+\end{proposition}
+
+\begin{proof}
+Let $I$ be an index set (countable or uncountable) and $\mathcal{F}_i$ a $\sigma$-algebra on $\Omega$ for each $i \in I$.
+Let $\mathcal{F} = \bigcap_i \mathcal{F}_i$. We want to show that $\mathcal{F}$ is a $\sigma$-algebra on $\Omega$.
+\begin{itemize}
+\item $\Omega \in \mathcal{F}$ because $\Omega \in \mathcal{F}_i$ for each $i$.
+\item Let $A \in \mathcal{F}$. So, $A \in \mathcal{F}_i$ for each $i$. By property 2, $A^c \in \mathcal{F}_i$ for each $i$. So, $A^c \in \mathcal{F}$.
+\item Let $A_1, A_2, \dots \in \mathcal{F}$. So, $A_1, A_2, \dots in \mathcal{F}_i$ for all $i$. This means that, by property 3, that their intersection is in each $\mathcal{F}_i$. Hence, the intersection is in $\mathcal{F}$.
+\end{itemize}
+Hence, $\mathcal{F}$ is a $\sigma$-algebra.
+\end{proof}
+
+A consequence of this proposition is that given an arbitrary collection $\mathcal{A}$ of subsets of $\Omega$, the intersection of all $\sigma$ -algebra containing $\mathcal{A}$ is the smallest $\sigma$ -algebra containbing $\mathcal{A}$.
+This is called the $\sigma$ -algebra generated by $\mathcal{A}$, denoted $\sigma(\mathcal{A})$:
+$$
+\sigma(\mathcal{A}) := \bigcap_{
+    \mathcal{F} \text{ is a } \sigma \text{-algebra such that } \mathcal{A} \subset \mathcal{F}
+} \mathcal{F}.
+$$
+
+Our interpretation for this is that $\mathcal{A}$ is the data (list of questions whose answers are directly provided). Then, we can answer more questions. The information generated by the data is $\sigma(\mathcal{A})$.
+
 
 * Random Variables
 * Random Vectors
