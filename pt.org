@@ -316,7 +316,7 @@ $$
 \begin{proof}
 Let's show that
 $$
-\sigma(\mathcal{A}_1) \subset \sigma(\mathcal{A}_3}) \subset \sigma(\mathcal{A}_2) \subset \sigma(\mathcal{A}_4) \subset \sigma(\mathcal{A}_8) \subset \sigma(\mathcal{A}_5) \subset \sigma(\mathcal{A}_6) \subset \sigma(\mathcal{A}_7) \subset \sigma(\mathcal{A}_1).
+\sigma(\mathcal{A}_1) \subset \sigma(\mathcal{A}_3) \subset \sigma(\mathcal{A}_2) \subset \sigma(\mathcal{A}_4) \subset \sigma(\mathcal{A}_8) \subset \sigma(\mathcal{A}_5) \subset \sigma(\mathcal{A}_6) \subset \sigma(\mathcal{A}_7) \subset \sigma(\mathcal{A}_1).
 $$
 First, we prove that $\sigma(\mathcal{A}_1) \subset \sigma(\mathcal{A}_3)$. Suppose $A \in \mathcal{A}_1$. We first show that $A \in \sigma(\mathcal{A}_3)$. Note that $A = (a, b)$ for some $a, b \in \R$ with $a < b$. Then,
 $$
@@ -361,6 +361,135 @@ Let's prove that $\mathcal{A}$ is a $\sigma$-algebra on $A$.
 \end{itemize}
 So $\mathcal{A}$ is a $\sigma$-algebra on $A$.
 \end{proof}
+
+** Monotone Class Theorem
+
+\begin{definition}[Dynkin system]
+Let $\Omega \ne \emptyset$ and $\mathcal{D}$ a collection of subsets of $\Omega$. $\mathcal{D}$ is called a Dynkin system ($\lambda$-system) on $\Omega$ if
+\begin{itemize}
+\item $\Omega \in \mathcal{D}$
+\item $A \in \mathcal{D} \implies A^c \in \mathcal{D}$
+\item If $A_1, A_2, \dots \in \mathcal{D}$ are disjoint, then $\cup_{i \in \N} A_i \in \mathcal{D}$
+\end{itemize}
+\end{definition}
+
+If you have a $\sigma$ -algebra, it is a Dynkin system. The converse fails in general. A Dynkin system cannot handle properly intersection of sets.
+Why don't we define another structure just for the purpose of dealing with intersections.
+
+\begin{definition}[Dynkin system]
+Let $\Omega \ne \emptyset$ and $\mathcal{P}$ a collection of subsets of $\Omega$. $\mathcal{P}$ is called a $\pi$ system on $\Omega$ if it is closed under finite intersections:
+$$
+A_1, \dots, A_n \in \mathcal{P} \implies \bigcap_{i=1}^n A_i \in \mathcal{P}.
+$$
+\end{definition}
+
+\begin{proposition}
+Let $\Omega \ne \emptyset$ and $\mathcal{F}$ a collection of subsets of $\Omega$. $\mathcal{F}$ is a $\sigma$-algebra if and only if it is a $\pi$-system and a $\lambda$-system.
+\end{proposition}
+
+\begin{proof}
+Suppose that $\mathcal{F}$ is a $\sigma$-algebra. Then, it is clearly a Dynkin system. It is also a $\pi$-system as shown before.
+Conversely, supppose $\mathcal{F}$ is a $\pi$-system and a Dynkin system. To show $\mathcal{F}$ is a $\sigma$-algebra, we only need to check it is closed under countable unions.
+To that end, let $A_1, A_2, \dots \in \mathcal{F}$.
+Set $B_1 := A_1, B_2 := A_2 \setminus A_1, B_3 := A_3 \setminus (A_1 \cup A_2), \dots, B_{n + 1} := A_{n + 1} \setminus (\cup_{i=1}^n A_i)$.
+Note that $B_i$'s are in $\mathcal{F}$ since
+$$
+B_{n + 1} = A_{n + 1} \cap (\cup_{i = 1}^n A_i)^c = A_{n + 1} \cap (\cap_{i = 1}^n A_i^c).
+$$
+Since $A_i \in \mathcal{F}$ and $\mathcal{F}$ is Dynkin system, $A_i^c \in \mathcal{F}$. Then, by the property of $\pi$-system, $B_i$'s are in $\mathcal{F}$.
+Observe that by contruction, $B_i$'s are disjoint. So, by the definition of Dynkin sysmtem,
+$$
+\bigcup_{i=1} A_i = \bigcup_{i=1} B_i \in \mathcal{F}.
+$$
+So, $\mathcal{F}$ is a $\sigma$-algebra.
+\end{proof}
+
+$\mathcal{A} = \{ (a, b) \mid a, b \in \R \}$ is a $\pi$ -system. This $\pi$ -system is much simpler than the Borel $\sigma$ -algebra $B(\R)$.
+The idea is that when proving a statement about $B(\R)$, can we "reduce" the proof to a statement about $\mathcal{A}$?
+
+\begin{theorem}[Monotone class theorem]
+Let $\Omega \ne \emptyset$. Let $\mathcal{P}$ be a $\pi$-system and $\mathcal{D}$ be a Dynkin system on $\Omega$. Then,
+$$
+\mathcal{P} \subset \mathcal{D} \implies \sigma(\mathcal{P}) \subset \mathcal{D}.
+$$
+\end{theorem}
+
+Suppose you have to prove a statement for every set in $\sigma(\mathcal{P})$. Follow this recipe
+\begin{itemize}
+\item Show the statement for every set in $\mathcal{P}$
+\item Show that the collection of all sets satisfying this property is a Dynkin system $\mathcal{D}$
+\item So $\mathcal{P} \subset \mathcal{D}$, use the theorem to conclude that $\sigma(\mathcal{D}) \subset \mathcal{D}$. So the statement holds for every set in $\sigma(\mathcal{P})$.
+\end{itemize}
+
+An arbitrary intersection of $\sigma$ -algebra is a $\sigma$ -algebra. The same is true for Dynkin systems and $\pi$ -systems.
+So, given a collection $\mathcal{A}$ of subsets of $\Omega$, we can talk about $\sigma(\mathcal{A})$, the smallest $\sigma$ -algebra contraining $\mathcal{A}$.
+We can talk about $\lambda(\mathcal{A})$, the smallest Dynkin system containing $\mathcal{A}$, and $\pi(\mathcal{A})$, the smallest $\pi$ -system contraining $\mathcal{A}$.
+In particular, if $\mathcal{D}$ is a Dynkin system,
+$$
+\mathcal{A} \subset \mathcal{D} \implies \lambda(\mathcal{A}) \subset \mathcal{D}.
+$$
+
+Suppose the Monotone class theorem holds true. Let's take $\mathcal{D} = \lambda(\mathcal{P})$ as a special case since $\mathcal{P} \lambda(\mathcal{P})$.
+By the theorem, we get
+$$
+\sigma(\mathcal{P}) \subset \lambda(\mathcal{P}).
+$$
+But on the other hand, $\lambda(\mathcal{P}) \subset \sigma(\mathcal{P})$, since $\sigma(\mathcal{P})$ is a Dynkin system and
+$$
+\mathcal{A} \subset \mathcal{D} \implies \lambda(\mathcal{A}) \subset \mathcal{D}.
+$$
+So, we get
+$$
+\lambda(\mathcal{P}) = \sigma(\mathcal{P}).
+$$
+Suppose conversely that $\lambda(\mathcal{P}) = \sigma(\mathcal{P})$ holds. Let $\mathcal{D}$ be a Dynkin system containing $\mathcal{P}$.
+So, $\mathcal{P} \subset \mathcal{D}$ implies $\lambda(\mathcal{P}) \subset \mathcal{D}$. But by the assumption, $\sigma(\mathcal{P}) = \lambda(\mathcal{P}) \subset \mathcal{D}$.
+So, the claim of the theorem holds.
+This results, or simplification of the theorem tells us that the Dynkin system and the $\sigam$ -algebra generated by a $\pi$ -system coincide.
+We now prove that
+$$
+\lambda(\mathcal{P}) = \sigma(\mathcal{P}).
+$$
+\begin{proof}
+First of all, $\lambda(\mathcal{P}) \subset \sigma(\mathcal{P})$ follows from the fact that $\sigma(\mathcal{P})$ is a Dynkin system containing $\mathcal{P}$.
+Now, we show that $\sigma(\mathcal{P}) \subset \lambda(\mathcal{P})$. To show this, it is sufficient to show that $\lambda(\mathcal{P})$ is a $\sigma$-algebra.
+This is because
+$$
+\mathcal{P} \subset \lambda(\mathcal{P}) \implies \sigma(\mathcal{P}) \subset \lambda(\mathcal{P}).
+$$
+To prove $\lambda(\mathcal{P})$ is a $\sigma$-algebra, by the ``$\sigma = \pi + \lambda$'' theorem, it is sufficient to show that $\lambda(\mathcal{P})$ is a $\pi$-system.
+Let's show that $A, B \in \mathcal{P} \implies A \cap B \in \lambda(\mathcal{P})$. We first show that
+$$
+A, B \in \mathcal{P} \implies A \cap B \in \lambda(\mathcal{P}).
+$$
+Since $\mathcal{P}$ is a $\pi$-system, $A \cap B \in \mathcal{P} \subset \lambda(\mathcal{P})$. Now, we show that
+$$
+A \in \mathcal{P}, B \in \lambda(\mathcal{P}) \implies A \cap B \in \lambda(\mathcal{P}).
+$$
+Let us fix $A \in \mathcal{P}$ and define
+$$
+\mathcal{B}_1 := \{ B \subset \Omega \mid A \cap B \in \lambda(\mathcal{P}) \}.
+$$
+If we can show that $\lambda(\mathcal{P}) \subset \mathcal{B}_1_$, then we are done.
+First, $\mathcal{P} \subset \mathcal{B}_1$. We now need to show that $\mathcal{B}_1$ is a Dynkin system, so that we can show that
+$$
+\mathcal{P} \subset \mathcal{B}_1 \implies \lambda(\mathcal{P}) \subset \mathcal{B}_1.
+$$
+The proof is left as an exercise for the readers (check the definition).
+Now, what remain for us to show is that
+$$
+A, B \in \lambda(\mathcal{P}) \implies A \cap B \in \lambda(\mathcal{P}).
+$$
+Let use fix $A \in \lambda(\mathcal{P})$ and define
+$$
+\mathcal{B}_2 = \{ B \subset \Omega \mid A \cap B \in \lambda(\mathcal{P}) \}.
+$$
+If we can show $\lambda(\mathcal{P}) \subset \mathcal{B}_2$, then we are done.
+First, $\mathcal{P} \subset \mathcal{B}_2$, by the previous step. To conclude, it is sufficient to show that $\mathcal{B}_2$ is a Dynkin system.
+The rest of the proof is left as an exercise for the readers.
+\end{proof}
+
+** Probability and Measure Spaces
 
 * Random Variables
 * Random Vectors
