@@ -491,6 +491,135 @@ The rest of the proof is left as an exercise for the readers.
 
 ** Probability and Measure Spaces
 
+In a measurable space $(\Omega, \mathcal{F})$, $\Omega$ is the sample sapce, a collection of all possible outcomes and $\mathcal{F}$ is the $\sigma$ -algebra, the collection of all interested events.
+The next we want to deal with is assigning probabilities to events.
+We define a function
+$$
+\mathbb{P}: \mathcal{F} \to \R_+
+$$
+with the following intuitive properties.
+\begin{itemize}
+\item $0 \le \mathbb{P}(A) \le 1$ for every $A \in \mathcal{F}$,
+\item $\mathbb{P}(\emptyset) = 0$,
+\item $\mathbb{P}(\Omega) = 1$,
+\item $A \cap B \ne \emptyset \implies \mathbb{P}(A \cup B) = \mathbb{P}(A) + \mathbb{P}(B)$.
+\end{itemize}
+
+\begin{definition}[Probability measure]
+Let $(\Omega, \mathcal{F})$ be a measruable space.
+A set function
+$$
+\P: \mathcal{F} \to \R_+
+$$
+is called a probability measure if it satisfies the following properties:
+\begin{itemize}
+\item $\mathbb{P}(\Omega) = 1$,
+\item $\P$ is countably additive: if $A_1, A_2, \dots \in \mathcal{F}$ are disjoint, then $\P(\cup_{i} A_i) = \sum_i \mathbb{P}(A_i)$
+\end{itemize}
+In this case, $(\Omega, \mathcal{F}, \P)$ is called a probability space.
+\end{definition}
+
+\begin{definition}[Almost surely]
+If an event $A \in \mathcal{F}$ has $\P(A) = 1$, then we say that $A$ occurs almost surely.
+\end{definition}
+
+*** Basic Properties of Probability Measure
+
+Let $(\O, \F, \P)$ be a probability space.
+\begin{proposition}
+$$
+\P(\emptyset) = 0.
+$$
+\end{proposition}
+\begin{proof}
+Let $A_1 = \Omega$ and $A_2 =  A_3 = \dots = \emptyset$.
+By property 2, we have
+$$
+\P(\O) = \P(\bigcup_{i=1}^\infty A_i) = \sum^\infty_{i=1} \P(A_i) = \P(\O) = \sum^\infty_{i=2} \P(\emptyset).
+$$
+So,
+$$
+\sum^\infty_{i=2} \P(\emptyset) = 0
+$$
+where $\P(\emptyset) \ge 0$.
+So,
+$$
+\P(\emptyset) = 0.
+$$
+\end{proof}
+
+\begin{proposition}[Finite additivity]
+$\P$ is finitely additive:
+$$
+A_1, \dots, A_n \in \F \implies \P(\bigcup^n_{i=1} A_i) = \sum^n_{i=1}
+$$
+\end{proposition}
+\begin{proof}
+Let $A_{n + 1} = A_{n + 2} = \dots = \emptyset$. By property 2,
+$$
+\P(\bigcup^n_{i=1} A_i) = \P(\bigcup^\infty_{i = 1} A_i) = \sum^n_{i=1} \P(A_i) + \sum^\infty_{i=n + 1} \P(A_i) = \sum^n_{i=1} \P(A_i).
+$$
+\end{proof}
+
+\begin{proposition}
+For every $A \in \F$,
+$$
+\P(A^c) = 1 - \P(A).
+$$
+\end{proposition}
+\begin{proof}
+Set $A_1 = A$ and $A_2 = A^c$. Apply the previous proposition:
+$$
+1 = \P(\O) = \P(A \cup A^c) = \P(A) + \P(A^c)
+$$
+\end{proof}
+
+*** Probabilities on Countable Set
+Suppose $\O = \{\omega_1, \dots, \omega_n \}$ or $\O = \{\omega_1, \omega_2, \dots \}$. Let $\F = 2^\O$.
+In both cases, every event $A$ is a countable set and can be written as
+$$
+A = \bigcup_{\omega \in A} \{ \omega \}
+$$
+which is a countable union. So, by property 2,
+$$
+\P(A) = \sum_{\omega \in A} \P(\{ \omega \}).
+$$
+So, to specify a probability measure $\P$, it suffices to specifcy the probabilities of singletons (elementary events):
+$$
+p_\omega := \P(\{\omega\}).
+$$
+
+\begin{lemma}
+Let $a_{ij} \ge 0$ for every $i, j \in \N$. Then
+$$
+\sum_{i=1}^\infty \sum_{j=1}^\infty a_{ij} = \sum_{j=1}^\infty \sum_{i=1}^\infty a_{ij}.
+$$
+\end{lemma}
+
+\begin{proposition}
+Let $\O$ be countable and $\F = 2^\O$. Let $p_\omega \ge 0$ for each $\omega \in \O$ such that
+$$
+\sum_{\omega \in \O} p_\omega = 1.
+$$
+Then,
+$$
+\P(A) = \sum_{\omega \in A} p_\omega, A \in \F
+$$
+defines a probability measure on $(\O, \F)$.
+\end{proposition}
+
+\begin{proof}
+First of all, we have
+$$
+\P(\O) = \sum_{\omega \in \O} p_\omega = 1.
+$$
+Secondly, let $A_1, A_2, \dots \in \F$ be disjoint sets. We want to show countable additivity.
+$$
+\P(\bigcup^\infty_{i=1} A_i) = \sum_{\omega \in \cup^\infty_{i=1} A_i} p_\omega = \sum_{\omega \in \O} \sum_{i : \omega \in A_i} p_\omega = \sum^\infty_{i=1} \sum_{\omega \in A_i} p_\omega = \sum^\infty_{i=1} \P(A_i).
+$$
+\end{proof}
+
+
 * Random Variables
 * Random Vectors
 * Conditioning
